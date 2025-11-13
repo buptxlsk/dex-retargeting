@@ -1,130 +1,96 @@
-<div align="center">
-  <h1 align="center"> Dex Retargeting </h1>
-  <h3 align="center">
-    Various retargeting optimizers to translate human hand motion to robot hand motion.
-  </h3>
-</div>
-<p align="center">
-  <!-- code check badges -->
-  <a href='https://github.com/dexsuite/dex-retargeting/blob/main/.github/workflows/test.yml'>
-      <img src='https://github.com/dexsuite/dex-retargeting/actions/workflows/test.yml/badge.svg' alt='Test Status' />
-  </a>
-  <!-- issue badge -->
-  <a href="https://github.com/dexsuite/dex-retargeting/issues">
-  <img src="https://img.shields.io/github/issues-closed/dexsuite/dex-retargeting.svg" alt="Issues Closed">
-  </a>
-  <a href="https://github.com/dexsuite/dex-retargeting/issues?q=is%3Aissue+is%3Aclosed">
-  <img src="https://img.shields.io/github/issues/dexsuite/dex-retargeting.svg" alt="Issues">
-  </a>
-  <!-- release badge -->
-  <a href="https://github.com/dexsuite/dex-retargeting/tags">
-  <img src="https://img.shields.io/github/v/release/dexsuite/dex-retargeting.svg?include_prereleases&sort=semver" alt="Releases">
-  </a>
-  <!-- pypi badge -->
-  <a href="https://github.com/dexsuite/dex-retargeting/tags">
-  <img src="https://static.pepy.tech/badge/dex_retargeting/month" alt="pypi">
-  </a>
-  <!-- license badge -->
-  <a href="https://github.com/dexsuite/dex-retargeting/blob/main/LICENSE">
-      <img alt="License" src="https://img.shields.io/badge/license-MIT-blue">
-  </a>
-</p>
-<div align="center">
-  <h4>This repo originates from <a href="https://yzqin.github.io/anyteleop/">AnyTeleop Project</a></h4>
-  <img src="example/vector_retargeting/teaser.webp" alt="Retargeting with different hands.">
-</div>
+# 简介
+该模块使用dex-retargeting算法，能够根据PoseArray数据实现实时遥操omnihand
 
-## Installation
+# 迁移过程
+1. 在运行该项目之前，先将[原项目](https://github.com/dexsuite/dex-retargeting)中的\example跑通，包括使用POSITION以及VECTOR/DEXPILOT这两种方法
 
-```shell
-pip install dex_retargeting
+2. 解压omnihand_yuanshi，利用其得到需要的urdf文件并放入assets/robots/hands中
+
+3. 注册新的机械手名称——omni
+* 修改src/dex_retargeting/constants.py
+* 根据规则由上面生成的urdf写出omni的yml文件，放入src/dex_retargeting/configs/teleop
+* 再次运行示例中的命令，生成omni的仿真视频
+
+# 环境
+软件：environment.yml
+
+硬件：
+```text
++-----------------------------------------------------------------------------------------+
+| NVIDIA-SMI 580.95.05              Driver Version: 580.95.05      CUDA Version: 13.0     |
++-----------------------------------------+------------------------+----------------------+
+| GPU  Name                 Persistence-M | Bus-Id          Disp.A | Volatile Uncorr. ECC |
+| Fan  Temp   Perf          Pwr:Usage/Cap |           Memory-Usage | GPU-Util  Compute M. |
+|                                         |                        |               MIG M. |
+|=========================================+========================+======================|
+|   0  NVIDIA GeForce RTX 5060 Ti     Off |   00000000:01:00.0  On |                  N/A |
+|  0%   42C    P5              8W /  180W |     933MiB /  16311MiB |      0%      Default |
+|                                         |                        |                  N/A |
++-----------------------------------------+------------------------+----------------------+
 ```
 
-To run the example, you may need additional dependencies for rendering and hand pose detection.
+# 直接运行
 
-```shell
-git clone https://github.com/dexsuite/dex-retargeting
-cd dex-retargeting
-pip install -e ".[example]"
+**1. 播放输入数据包**
+```bash
+  cd example/vector_retargeting/DATA_DEXRT/dexrt_vrpn_1
+  ros2 bag play dexrt_vrpn_1_0.db3 -l 
+```
+**2. 启动节点输出**
+```bash
+  python3 retargeting_ros2.py \
+  --robot_name omni \
+  --retargeting_type dexpilot \
+  --hand_type right \
+  --ros_topic /hotrack/landmarks
+```
+此处ros_topic的名字取决于发布设备
+
+**3. 新建终端检测输出**
+```bash
+  ros2 topic echo /joint_commands
+```
+该话题中msg格式如下
+```text
+std_msgs/Header header
+string[] name
+float64[] position
+float64[] velocity
+float64[] effort
+----------------------
+示例
+header: 
+    stamp: 
+        sec: 1763004233 
+        nanosec: 907039370 
+    frame_id: omnihand_right_base
+name: 
+- R_thumb_roll_joint 
+- R_index_abad_joint
+...
+position: 
+- 0.4316634526107366
+- -0.2102860283871998
+...
+velocity: [] 
+effort: []
 ```
 
-## Changelog
-
-### v0.5.0
-
-- **Numpy Support Update**: Starting from this version, `dex-retargeting` supports `numpy >= 2.0.0`. If you need to use `numpy < 2.0.0`, you can install an earlier version of `dex-retargeting` using:
-  ```bash
-  pip install "dex-retargeting<0.5.0"
-  ```
-
-- **Mediapipe Compatibility**: Although `mediapipe` lists `numpy 1.x` as a dependency, it is compatible with `numpy >= 2.0.0`. You can safely ignore any warnings related to this and continue using `numpy 2.0.0` or higher.
-
-- **Dependency Cleanup**: Removed `trimesh` as a dependency to simplify installation and reduce potential conflicts. The core functionality of `dex-retargeting` no longer requires mesh processing capabilities.
-
-## Examples
-
-### Retargeting from human hand video
-
-This type of retargeting can be used for applications like teleoperation,
-e.g. [AnyTeleop](https://yzqin.github.io/anyteleop/).
-
-[Tutorial on retargeting from human hand video](example/vector_retargeting/README.md)
-
-### Retarget from hand object pose dataset
-
-![teaser](example/position_retargeting/hand_object.webp)
-
-This type of retargeting can be used post-process human data for robot imitation,
-e.g. [DexMV](https://yzqin.github.io/dexmv/).
-
-[Tutorial on retargeting from hand-object pose dataset](example/position_retargeting/README.md)
-
-## FAQ and Troubleshooting
-
-### Joint Orders for Retargeting
-
-URDF parsers, such as ROS, physical simulators, real robot driver, and this repository, may parse URDF files with
-different joint orders. To use `dex-retargeting` results with other libraries, handle joint ordering explicitly **using
-joint names**, which are unique within a URDF file.
-
-Example: Using `dex-retargeting` with the SAPIEN simulator
-
-```python
-from dex_retargeting.seq_retarget import SeqRetargeting
-
-retargeting: SeqRetargeting
-sapien_joint_names = [joint.get_name() for joint in robot.get_active_joints()]
-retargeting_joint_names = retargeting.joint_names
-retargeting_to_sapien = np.array([retargeting_joint_names.index(name) for name in sapien_joint_names]).astype(int)
-
-# Use the index map to handle joint order differences
-sapien_robot.set_qpos(retarget_qpos[retargeting_to_sapien])
+若正常显示，打通链路如下：
+```mermaid
+graph TD;
+  A[/vrpn/hand_kp：bag 播放出的 VRPN 手部 3D 关键点]-->
+  B[ROS2LandmarkSubscriber：把 PoseArray → 21×3，归一化+旋转];
+  B-->C[优化器（DexPilot/Vector）：吃 3D 向量 → 求解 omnihand 的关节角];
+  C-->D[/joint_commands：按 SAPIEN 关节顺序发布关节角 JointState];
 ```
 
-This example retrieves joint names from the SAPIEN robot and `SeqRetargeting` object, creates a mapping
-array (`retargeting_to_sapien`) to map joint indices, and sets the SAPIEN robot's joint positions using the retargeted
-joint positions.
-
-## Citation
-
-This repository is derived from the [AnyTeleop Project](https://yzqin.github.io/anyteleop/) and is subject to ongoing
-enhancements. If you utilize this work, please cite it as follows:
-
-```shell
-@inproceedings{qin2023anyteleop,
-  title     = {AnyTeleop: A General Vision-Based Dexterous Robot Arm-Hand Teleoperation System},
-  author    = {Qin, Yuzhe and Yang, Wei and Huang, Binghao and Van Wyk, Karl and Su, Hao and Wang, Xiaolong and Chao, Yu-Wei and Fox, Dieter},
-  booktitle = {Robotics: Science and Systems},
-  year      = {2023}
-}
+**4. 将输出转换为SAPIEN 3D 窗口中手部模型的运动**
+```bash
+  python3 show_retargeting_ros2.py \
+  --robot_name omni \
+  --retargeting_type dexpilot \
+  --hand_type right \
+  --ros_topic /vrpn/hand_kp
 ```
-
-## Acknowledgments
-
-The robot hand models in this repository are sourced directly from [dex-urdf](https://github.com/dexsuite/dex-urdf).
-The robot kinematics in this repo are based on [pinocchio](https://github.com/stack-of-tasks/pinocchio).
-Examples use [SAPIEN](https://github.com/haosulab/SAPIEN) for rendering and visualization.
-
-The `PositionOptimizer` leverages methodologies from our earlier
-project, [From One Hand to Multiple Hands](https://yzqin.github.io/dex-teleop-imitation/).
-Additionally, the `DexPilotOptimizer`is crafted using insights from [DexPilot](https://sites.google.com/view/dex-pilot).
+此处ros_topic的名字取决于发布设备

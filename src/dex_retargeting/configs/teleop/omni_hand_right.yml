@@ -1,0 +1,28 @@
+retargeting:
+  type: vector
+  urdf_path: omni_hand/omnihand_right.urdf
+
+  # 需要显式指定：仅包含独立主关节，不能包含 mimic 关节
+  target_joint_names:
+    - R_thumb_roll_joint
+    - R_thumb_abad_joint
+    - R_thumb_mcp_joint
+    - R_index_abad_joint
+    - R_index_pip_joint
+    - R_middle_pip_joint
+    - R_ring_abad_joint
+    - R_ring_pip_joint
+    - R_pinky_abad_joint
+    - R_pinky_pip_joint
+
+  # Target：机器人手上的向量（origin → task）
+  target_origin_link_names: [ "R_palm", "R_palm", "R_palm", "R_palm", "R_palm" ]
+  target_task_link_names:   [ "R_thumb_tip", "R_index_tip", "R_middle_tip", "R_ring_tip", "R_pinky_tip" ]
+  scaling_factor: 1.0
+
+  # Source：人手关键点（MediaPipe 索引）
+  # 一行是起点，一行是终点；这里都是 wrist→各指尖
+  target_link_human_indices: [ [ 0, 0, 0, 0, 0 ], [ 4, 8, 12, 16, 20 ] ]
+
+  # 越小越平滑，略增延迟
+  low_pass_alpha: 0.3

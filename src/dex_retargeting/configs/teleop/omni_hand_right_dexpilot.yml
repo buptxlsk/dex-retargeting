@@ -1,0 +1,24 @@
+retargeting:
+  type: DexPilot
+  urdf_path: omni_hand/omnihand_right.urdf
+
+  # Target (robot hand)
+  wrist_link_name: "R_palm"
+  finger_tip_link_names: ["R_thumb_tip", "R_index_tip", "R_middle_tip", "R_ring_tip", "R_pinky_tip"]
+  scaling_factor: 1.0
+
+  # 建议明确优化的目标关节（按该 URDF 实际可动关节挑主 DOF；与常见 OmniHand 风格一致）
+  target_joint_names:
+    - R_thumb_roll_joint
+    - R_thumb_abad_joint
+    - R_thumb_mcp_joint
+    - R_index_abad_joint
+    - R_index_pip_joint
+    - R_middle_pip_joint
+    - R_ring_abad_joint
+    - R_ring_pip_joint
+    - R_pinky_abad_joint
+    - R_pinky_pip_joint
+
+  # Temporal smoothing（越小越平滑）
+  low_pass_alpha: 0.45
