@@ -266,7 +266,7 @@ class VectorOptimizer(Optimizer):
             # Index link for computation
             origin_link_pos = torch_body_pos[self.origin_link_indices, :]
             task_link_pos = torch_body_pos[self.task_link_indices, :]
-            robot_vec = task_link_pos - origin_link_pos
+            robot_vec = task_link_pos - origin_link_pos # 机器人当前的 finger vector
 
             # Loss term for kinematics retargeting based on 3D position error
             vec_dist = torch.norm(robot_vec - torch_target_vec, dim=1, keepdim=False)

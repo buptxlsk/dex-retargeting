@@ -21,4 +21,4 @@ retargeting:
     - R_pinky_pip_joint
 
   # Temporal smoothing（越小越平滑）
-  low_pass_alpha: 0.45
+  low_pass_alpha: 0.48
