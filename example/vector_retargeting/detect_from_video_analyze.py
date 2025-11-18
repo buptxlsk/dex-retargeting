@@ -83,6 +83,24 @@ def retarget_video(
             # =========================
             qpos = retargeting.retarget(ref_value)
 
+            names = retargeting.optimizer.robot.dof_joint_names
+            def clip_joint(qpos, names, joint_name, lo, hi, scale=1.0, bias=0.0):
+                if joint_name in names:
+                    idx = names.index(joint_name)
+                    val = qpos[idx] * scale + bias
+                    qpos[idx] = float(np.clip(val, lo, hi))
+
+            # 小指：削弱 flexion
+            clip_joint(qpos, names,
+                    joint_name="R_pinky_pip_joint",
+                    lo=-1.0, hi=1.6,  # 先给个宽范围，之后你可以按 URDF 改
+                    scale=0.7)
+
+            # 拇指 roll：增强一点
+            clip_joint(qpos, names,
+                    joint_name="R_thumb_roll_joint",
+                    lo=-0.2, hi=0.8,  # 大概按你 URDF 的 range 预估
+                    scale=1.2)        # 放大 1.5 倍试试
             # =========================
             # 3) 计算“分析用”的 human_vec / robot_vec
             #    （不要求和优化内部完全一样，只要定义自洽，用来做误差对比）

@@ -173,6 +173,29 @@ def start_retargeting(queue: multiprocessing.Queue, robot_dir: str, config_path:
                 task_indices = indices[1, :]
                 ref_value = joint_pos[task_indices, :] - joint_pos[origin_indices, :]
                 qpos = retargeting.retarget(ref_value)  # full DOF
+
+                names = retargeting.optimizer.robot.dof_joint_names
+                def clip_joint(qpos, names, joint_name, lo, hi, scale=1.0, bias=0.0):
+                    if joint_name in names:
+                        idx = names.index(joint_name)
+                        val = qpos[idx] * scale + bias
+                        qpos[idx] = float(np.clip(val, lo, hi))
+
+                clip_joint(qpos, names,
+                        joint_name="R_pinky_pip_joint",
+                        lo=-1.0, hi=1.6, 
+                        scale=0.8)
+
+                clip_joint(qpos, names,
+                        joint_name="R_thumb_roll_joint",
+                        lo=-0.2, hi=0.8,  
+                        scale=1.2)
+                
+                clip_joint(qpos, names,
+                        joint_name="R_thumb_mcp_joint",
+                        lo=-0.2, hi=0.8,  
+                        scale=1.2)
+                
                 qpos_publish = qpos[idx_publish]        # 只取 10 个
 
                 joint_publisher_node.joint_names = list(actuated_joint_names)

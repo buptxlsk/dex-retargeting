@@ -6,12 +6,12 @@
 
 ```shell
 cd example/vector_retargeting
-python3 detect_from_video.py \
-  --robot-name allegro \
+python3 detect_from_video_analyze.py \
+  --robot-name omni \
   --video-path data/human_hand_video.mp4 \
   --retargeting-type dexpilot \
   --hand-type right \
-  --output-path data/allegro_joints.pkl 
+  --output-path data/omni_test_.pkl 
 ```
 
 This command will output the joint trajectory as a pickle file at the `output_path`.
@@ -29,8 +29,8 @@ python3 detect_from_video.py --help
 
 ```shell
 python3 render_robot_hand.py \
-  --pickle-path data/allegro_joints.pkl \
-  --output-video-path data/allegro.mp4 \
+  --pickle-path data/omni_test_.pkl \
+  --output-video-path data/omni_test_.mp4 \
   --headless
 ```
 
