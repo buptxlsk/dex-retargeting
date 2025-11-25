@@ -9,7 +9,12 @@
 3. 注册新的机械手名称——omni
 * 修改src/dex_retargeting/constants.py
 * 根据规则由上面生成的urdf写出omni的yml文件，放入src/dex_retargeting/configs/teleop
-* 再次运行示例中的命令，生成omni的仿真视频
+* 再次运行示例中的命令，生成omni的仿真视频，注意每次注册新的机械手后都要重新pip install
+```bash
+cd ~/code/dex-retargeting
+pip uninstall -y dex_retargeting
+pip install -e .
+```
 
 # 环境
 软件：environment.yml
@@ -38,7 +43,7 @@
 ```
 **2. 启动节点输出**
 ```bash
-  python3 retargeting_ros2.py \
+  python retargeting_ros2.py \
   --robot_name omni \
   --retargeting_type dexpilot \
   --hand_type right \
@@ -87,10 +92,23 @@ graph TD;
 
 **4. 将输出转换为SAPIEN 3D 窗口中手部模型的运动**
 ```bash
-  python3 show_retargeting_ros2.py \
+  python retargeting_sapien_ros2.py \
   --robot_name omni \
   --retargeting_type dexpilot \
   --hand_type right \
   --ros_topic /vrpn/hand_kp
+```
+此处ros_topic的名字取决于发布设备
+
+**5. 将输出转换为MUJOCO 3D 窗口中手部模型的运动**
+
+由于智元官方没有给出omnihand的.xml文件，使用开源的方法[urdf2mjcf](https://github.com/kscalelabs/urdf2mjcf)将.urdf转换为.xml并放入运行目录下
+```bash
+python retargeting_mujoco_ros2.py \
+    --robot_name omni \
+    --retargeting_type dexpilot \
+    --hand_type right \
+    --mjcf_path ./omnihand_right.xml \
+    --ros_topic /hotrack/landmarks
 ```
 此处ros_topic的名字取决于发布设备

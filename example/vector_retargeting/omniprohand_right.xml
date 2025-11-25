@@ -1,0 +1,276 @@
+<mujoco model="omniprohand">
+  <option gravity="0 0 0"/>
+  <default>
+    <default class="robot">
+      <default class="motor">
+        <joint damping="0.01"/>
+        <motor gear="1"/>
+      </default>
+      <default class="visual">
+        <geom material="visualgeom" contype="0" conaffinity="0" group="2" />
+      </default>
+      <default class="collision">
+        <geom material="collision_material" condim="3" contype="0" conaffinity="1" priority="1" group="1" solref="0.005 1" solimp="0.99 0.999 1e-05" friction="1 0.01 0.01" />
+      </default>
+    </default>
+  </default>
+
+  <compiler angle="radian" />
+
+  <asset>
+    <material name="visualgeom" rgba="1 1 1 1" />
+    <material name="default_material" rgba="0.7 0.7 0.7 1" />
+    <material name="collision_material" rgba="1.0 0.28 0.1 0.9" />
+    <mesh name="hand_base_link.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/omnipro_hand/meshes/hand_base_link.STL" />
+    <mesh name="thumb_metacarpals_base1.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/omnipro_hand/meshes/thumb_metacarpals_base1.STL" />
+    <mesh name="thumb_metacarpals_base2.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/omnipro_hand/meshes/thumb_metacarpals_base2.STL" />
+    <mesh name="thumb_metacarpals.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/omnipro_hand/meshes/thumb_metacarpals.STL" />
+    <mesh name="thumb_proximal.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/omnipro_hand/meshes/thumb_proximal.STL" />
+    <mesh name="thumb_distal.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/omnipro_hand/meshes/thumb_distal.STL" />
+    <mesh name="thumb_Virtual_Point.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/omnipro_hand/meshes/thumb_Virtual_Point.STL" />
+    <mesh name="index_metacarpals.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/omnipro_hand/meshes/index_metacarpals.STL" />
+    <mesh name="index_proximal.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/omnipro_hand/meshes/index_proximal.STL" />
+    <mesh name="index_middle.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/omnipro_hand/meshes/index_middle.STL" />
+    <mesh name="index_distal.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/omnipro_hand/meshes/index_distal.STL" />
+    <mesh name="index_Virtual_Point.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/omnipro_hand/meshes/index_Virtual_Point.STL" />
+    <mesh name="middle_metacarpals.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/omnipro_hand/meshes/middle_metacarpals.STL" />
+    <mesh name="middle_proximal.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/omnipro_hand/meshes/middle_proximal.STL" />
+    <mesh name="middle_middle.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/omnipro_hand/meshes/middle_middle.STL" />
+    <mesh name="middle_distal.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/omnipro_hand/meshes/middle_distal.STL" />
+    <mesh name="middle_Virtual_Point.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/omnipro_hand/meshes/middle_Virtual_Point.STL" />
+    <mesh name="ring_proximal.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/omnipro_hand/meshes/ring_proximal.STL" />
+    <mesh name="ring_middle.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/omnipro_hand/meshes/ring_middle.STL" />
+    <mesh name="ring_distal.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/omnipro_hand/meshes/ring_distal.STL" />
+    <mesh name="ring_Virtual_Point.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/omnipro_hand/meshes/ring_Virtual_Point.STL" />
+    <mesh name="pinky_proximal.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/omnipro_hand/meshes/pinky_proximal.STL" />
+    <mesh name="pinky_middle.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/omnipro_hand/meshes/pinky_middle.STL" />
+    <mesh name="pinky_distal.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/omnipro_hand/meshes/pinky_distal.STL" />
+    <mesh name="pinky_Virtual_Point.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/omnipro_hand/meshes/pinky_Virtual_Point.STL" />
+  </asset>
+
+  <worldbody>
+    <body name="hand_base_link" pos="0.00000000 0.00000000 0.00000000" quat="1 0 0 0" childclass="robot">
+      <freejoint name="floating_base" />
+      <geom name="hand_base_link_collision" pos="0 0 0" quat="1.0 0.0 0.0 0.0" type="mesh" mesh="hand_base_link.STL" class="collision" />
+      <geom name="hand_base_link_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0"  type="mesh" mesh="hand_base_link.STL" class="visual" />
+      <body name="thumb_metacarpals_base1" pos="-0.0075211 0.022278 0.04025" quat="1.0 0.0 0.0 0.0">
+        <joint name="thumb_cmc_roll" type="hinge" ref="0.0" class="motor" range="-0.2930 0.6489" axis="1 0 0" />
+        <site name="thumb_cmc_roll_site" pos="0 0 0" quat="1 0 0 0" />
+        <inertial pos="0.0128313930736693 -0.000678732032779711 -6.35818794832849E-05" quat="1.0 0.0 0.0 0.0" mass="0.00393646374828629" diaginertia="5.66342021103653e-07 2.92953553344946e-07 6.19998879375208e-07" />
+        <geom name="thumb_metacarpals_base1_collision" pos="0 0 0" quat="1.0 0.0 0.0 0.0" type="mesh" mesh="thumb_metacarpals_base1.STL" class="collision" />
+        <geom name="thumb_metacarpals_base1_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0"  type="mesh" mesh="thumb_metacarpals_base1.STL" class="visual" />
+        <body name="thumb_metacarpals_base2" pos="0.0350706488516897 0.00330139200274943 0" quat="1.0 0.0 0.0 0.0">
+          <joint name="thumb_cmc_yaw" type="hinge" ref="0.0" class="motor" range="0 1.3868" axis="0 0 -1" />
+          <site name="thumb_cmc_yaw_site" pos="0 0 0" quat="1 0 0 0" />
+          <inertial pos="0.00581591430824001 0.00635157624424623 0.0030181797779424" quat="1.0 0.0 0.0 0.0" mass="0.00171679583795965" diaginertia="1.18471956476211e-07 1.14929858642022e-07 9.67476477234771e-08" />
+          <geom name="thumb_metacarpals_base2_collision" pos="0 0 0" quat="1.0 0.0 0.0 0.0" type="mesh" mesh="thumb_metacarpals_base2.STL" class="collision" />
+          <geom name="thumb_metacarpals_base2_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0"  type="mesh" mesh="thumb_metacarpals_base2.STL" class="visual" />
+          <body name="thumb_metacarpals" pos="0.0161297170352622 0.0163048601861332 0.00686106204760886" quat="0.3446862837697924 -0.4118798565107786 -0.17191139011376919 -0.8258285678824523">
+            <joint name="thumb_cmc_pitch" type="hinge" ref="0.0" class="motor" range="0 0.8268" axis="0 1 0" />
+            <site name="thumb_cmc_pitch_site" pos="0 0 0" quat="1 0 0 0" />
+            <inertial pos="0.00385872987613253 0.000181218415040837 0.0262735842223975" quat="1.0 0.0 0.0 0.0" mass="0.0170904824194818" diaginertia="6.63118248451921e-06 8.03870891218123e-06 1.83070429843817e-06" />
+            <geom name="thumb_metacarpals_collision" pos="0 0 0" quat="1.0 0.0 0.0 0.0" type="mesh" mesh="thumb_metacarpals.STL" class="collision" />
+            <geom name="thumb_metacarpals_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0"  type="mesh" mesh="thumb_metacarpals.STL" class="visual" />
+            <body name="thumb_proximal" pos="0.00816453404663862 -0.00144999989303646 0.0556339310817644" quat="1.0 0.0 0.0 0.0">
+              <joint name="thumb_mcp" type="hinge" ref="0.0" class="motor" range="0 1.2908" axis="0 1 0" />
+              <site name="thumb_mcp_site" pos="0 0 0" quat="1 0 0 0" />
+              <inertial pos="-0.00245377652568594 0.00186599902568424 0.0134436674550769" quat="1.0 0.0 0.0 0.0" mass="0.00522967724458737" diaginertia="4.48792018896274e-07 6.21158736091837e-07 2.2512440353929e-07" />
+              <geom name="thumb_proximal_collision" pos="0 0 0" quat="1.0 0.0 0.0 0.0" type="mesh" mesh="thumb_proximal.STL" class="collision" />
+              <geom name="thumb_proximal_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0"  type="mesh" mesh="thumb_proximal.STL" class="visual" />
+              <body name="thumb_distal" pos="-0.00154750718363847 0.00149999983118392 0.0345280593371561" quat="1.0 0.0 0.0 0.0">
+                <joint name="thumb_ip" type="hinge" ref="0.0" class="motor" range="0 1.3781" axis="0 1 0" />
+                <site name="thumb_ip_site" pos="0 0 0" quat="1 0 0 0" />
+                <inertial pos="0.000428123853169746 2.07014406468898E-05 0.00928509405558531" quat="1.0 0.0 0.0 0.0" mass="0.00521800975168049" diaginertia="3.59710358459503e-07 3.45473494359169e-07 2.64028535580618e-07" />
+                <geom name="thumb_distal_collision" pos="0 0 0" quat="1.0 0.0 0.0 0.0" type="mesh" mesh="thumb_distal.STL" class="collision" />
+                <geom name="thumb_distal_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0"  type="mesh" mesh="thumb_distal.STL" class="visual" />
+                <body name="thumb_Virtual_Point" pos="-0.00661702686299999 -4.99999381474688E-05 0.0315676558844293" quat="1.0 0.0 0.0 0.0">
+                  <inertial pos="0.000233035989326169 5.00064540250775E-05 4.67970036186205E-05" quat="1.0 0.0 0.0 0.0" mass="5.23598775598299E-07" diaginertia="5.23598775598299e-14 5.23598775598299e-14 5.23598775598299e-14" />
+                  <geom name="thumb_Virtual_Point_collision" pos="0 0 0" quat="1.0 0.0 0.0 0.0" type="mesh" mesh="thumb_Virtual_Point.STL" class="collision" />
+                  <geom name="thumb_Virtual_Point_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0"  type="mesh" mesh="thumb_Virtual_Point.STL" class="visual" />
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+      <body name="index_metacarpals" pos="-0.00719999999308767 0.030778354272632 0.119355702147758" quat="1.0 0.0 0.0 0.0">
+        <joint name="index_mcp_roll" type="hinge" ref="0.0" class="motor" range="-0.2616 0.2616" axis="-1 0 0" />
+        <site name="index_mcp_roll_site" pos="0 0 0" quat="1 0 0 0" />
+        <inertial pos="0.00148754096391645 -5.49503463911916E-09 0.0020193309982513" quat="1.0 0.0 0.0 0.0" mass="0.00107972483821526" diaginertia="3.55597226363628e-08 2.11264180987165e-08 3.62864110573929e-08" />
+        <geom name="index_metacarpals_collision" pos="0 0 0" quat="1.0 0.0 0.0 0.0" type="mesh" mesh="index_metacarpals.STL" class="collision" />
+        <geom name="index_metacarpals_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0"  type="mesh" mesh="index_metacarpals.STL" class="visual" />
+        <body name="index_proximal" pos="0.00736980261911774 0 0" quat="1.0 0.0 0.0 0.0">
+          <joint name="index_mcp_pitch" type="hinge" ref="0.0" class="motor" range="0 1.3519" axis="0 1 0" />
+          <site name="index_mcp_pitch_site" pos="0 0 0" quat="1 0 0 0" />
+          <inertial pos="-0.0011507020809311 -2.08334184405266E-05 0.0212647300382613" quat="1.0 0.0 0.0 0.0" mass="0.0047795679529425" diaginertia="5.44832577804325e-07 5.41640689587984e-07 1.75594690124638e-07" />
+          <geom name="index_proximal_collision" pos="0 0 0" quat="1.0 0.0 0.0 0.0" type="mesh" mesh="index_proximal.STL" class="collision" />
+          <geom name="index_proximal_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0"  type="mesh" mesh="index_proximal.STL" class="visual" />
+          <body name="index_middle" pos="-0.00305282449335901 0 0.0399071116817979" quat="1.0 0.0 0.0 0.0">
+            <joint name="index_pip" type="hinge" ref="0.0" class="motor" range="0 1.52" axis="0 1 0" />
+            <site name="index_pip_site" pos="0 0 0" quat="1 0 0 0" />
+            <inertial pos="0.000582798950647259 -1.66623930000845E-05 0.0134419047168478" quat="1.0 0.0 0.0 0.0" mass="0.00270775195657711" diaginertia="2.25567812011315e-07 1.61875481956388e-07 1.1790038033522e-07" />
+            <geom name="index_middle_collision" pos="0 0 0" quat="1.0 0.0 0.0 0.0" type="mesh" mesh="index_middle.STL" class="collision" />
+            <geom name="index_middle_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0"  type="mesh" mesh="index_middle.STL" class="visual" />
+            <body name="index_distal" pos="0.00530686089658646 0 0.0265922869892696" quat="1.0 0.0 0.0 0.0">
+              <joint name="index_dip" type="hinge" ref="0.0" class="motor" range="0 1.369" axis="0 1 0" />
+              <site name="index_dip_site" pos="0 0 0" quat="1 0 0 0" />
+              <inertial pos="-0.00721640324456499 -3.10526118675776E-05 0.00510323974876059" quat="1.0 0.0 0.0 0.0" mass="0.00258259704107596" diaginertia="1.30227806624487e-07 1.36472647538679e-07 1.01017185875891e-07" />
+              <geom name="index_distal_collision" pos="0 0 0" quat="1.0 0.0 0.0 0.0" type="mesh" mesh="index_distal.STL" class="collision" />
+              <geom name="index_distal_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0"  type="mesh" mesh="index_distal.STL" class="visual" />
+              <body name="index_Virtual_Point" pos="-0.0152816370939128 0 0.0240371666710466" quat="1.0 0.0 0.0 0.0">
+                <inertial pos="2.59494682686157E-12 1.08447278934776E-12 -2.77555756156289E-17" quat="1.0 0.0 0.0 0.0" mass="5.23598775598299E-07" diaginertia="5.23598775598299e-14 5.23598775598299e-14 5.23598775598299e-14" />
+                <geom name="index_Virtual_Point_collision" pos="0 0 0" quat="1.0 0.0 0.0 0.0" type="mesh" mesh="index_Virtual_Point.STL" class="collision" />
+                <geom name="index_Virtual_Point_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0"  type="mesh" mesh="index_Virtual_Point.STL" class="visual" />
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+      <body name="middle_metacarpals" pos="-0.00720002856790489 0.00666067883725946 0.119355672566023" quat="1.0 0.0 0.0 0.0">
+        <joint name="middle_mcp_roll" type="hinge" ref="0.0" class="motor" range="-0.26 0.26" axis="-1 0 0" />
+        <site name="middle_mcp_roll_site" pos="0 0 0" quat="1 0 0 0" />
+        <inertial pos="0.00148754096057072 3.28886513297454E-06 0.00201932832117667" quat="1.0 0.0 0.0 0.0" mass="0.00107972484789827" diaginertia="3.55597227804492e-08 2.11264584194102e-08 3.62863711473445e-08" />
+        <geom name="middle_metacarpals_collision" pos="0 0 0" quat="1.0 0.0 0.0 0.0" type="mesh" mesh="middle_metacarpals.STL" class="collision" />
+        <geom name="middle_metacarpals_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0"  type="mesh" mesh="middle_metacarpals.STL" class="visual" />
+        <body name="middle_proximal" pos="0.00736980261904721 0 0" quat="1.0 0.0 0.0 0.0">
+          <joint name="middle_mcp_pitch" type="hinge" ref="0.0" class="motor" range="0 1.35" axis="0 0.999998669223613 -0.00163142606439766" />
+          <site name="middle_mcp_pitch_site" pos="0 0 0" quat="1 0 0 0" />
+          <inertial pos="-0.00165985032192234 6.30950482594017E-05 0.0236220231228174" quat="1.0 0.0 0.0 0.0" mass="0.0055122415444485" diaginertia="7.79066281858944e-07 7.60600012773068e-07 2.05882994190045e-07" />
+          <geom name="middle_proximal_collision" pos="0 0 0" quat="1.0 0.0 0.0 0.0" type="mesh" mesh="middle_proximal.STL" class="collision" />
+          <geom name="middle_proximal_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0"  type="mesh" mesh="middle_proximal.STL" class="visual" />
+          <body name="middle_middle" pos="-0.004144 7.3133E-05 0.044828" quat="1.0 0.0 0.0 0.0">
+            <joint name="middle_pip" type="hinge" ref="0.0" class="motor" range="0 1.814" axis="0 1 -0.0016314" />
+            <site name="middle_pip_site" pos="0 0 0" quat="1 0 0 0" />
+            <inertial pos="-0.000230368247225323 5.52667321999743E-05 0.01619749717231" quat="1.0 0.0 0.0 0.0" mass="0.00314204808883818" diaginertia="3.20092678111392e-07 2.47015765909473e-07 1.35843361683385e-07" />
+            <geom name="middle_middle_collision" pos="0 0 0" quat="1.0 0.0 0.0 0.0" type="mesh" mesh="middle_middle.STL" class="collision" />
+            <geom name="middle_middle_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0"  type="mesh" mesh="middle_middle.STL" class="visual" />
+            <body name="middle_distal" pos="0.00362953932909984 5.15731342090597E-05 0.031612259069028" quat="1.0 0.0 0.0 0.0">
+              <joint name="middle_dip" type="hinge" ref="0.0" class="motor" range="0 1.256" axis="0 0.99999866922354 -0.0016314261089444" />
+              <site name="middle_dip_site" pos="0 0 0" quat="1 0 0 0" />
+              <inertial pos="-0.00724758468028898 -2.27990144281735E-05 0.00505893372906674" quat="1.0 0.0 0.0 0.0" mass="0.00258260294313138" diaginertia="1.29720848656837e-07 1.36472188916914e-07 1.01526072268206e-07" />
+              <geom name="middle_distal_collision" pos="0 0 0" quat="1.0 0.0 0.0 0.0" type="mesh" mesh="middle_distal.STL" class="collision" />
+              <geom name="middle_distal_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0"  type="mesh" mesh="middle_distal.STL" class="visual" />
+              <body name="middle_Virtual_Point" pos="-0.0154287963750709 3.90611932357243E-05 0.0239429432292471" quat="1.0 0.0 0.0 0.0">
+                <inertial pos="4.81580053612873E-13 1.33037331151442E-12 -6.74460487459783E-15" quat="1.0 0.0 0.0 0.0" mass="5.23598775598299E-07" diaginertia="5.23598775598299e-14 5.23598775598299e-14 5.23598775598299e-14" />
+                <geom name="middle_Virtual_Point_collision" pos="0 0 0" quat="1.0 0.0 0.0 0.0" type="mesh" mesh="middle_Virtual_Point.STL" class="collision" />
+                <geom name="middle_Virtual_Point_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0"  type="mesh" mesh="middle_Virtual_Point.STL" class="visual" />
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+      <body name="ring_proximal" pos="0.0001598 -0.013573 0.11972" quat="1.0 0.0 0.0 0.0">
+        <joint name="ring_mcp_pitch" type="hinge" ref="0.0" class="motor" range="0 1.55" axis="0 1 0" />
+        <site name="ring_mcp_pitch_site" pos="0 0 0" quat="1 0 0 0" />
+        <inertial pos="-0.00161802170047008 -2.08220096852268E-05 0.0212342177709951" quat="1.0 0.0 0.0 0.0" mass="0.0047795328266326" diaginertia="5.43923252152409e-07 5.41640127982143e-07 1.76501748993068e-07" />
+        <geom name="ring_proximal_collision" pos="0 0 0" quat="1.0 0.0 0.0 0.0" type="mesh" mesh="ring_proximal.STL" class="collision" />
+        <geom name="ring_proximal_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0"  type="mesh" mesh="ring_proximal.STL" class="visual" />
+        <body name="ring_middle" pos="-0.0039295 0 0.03983" quat="1.0 0.0 0.0 0.0">
+          <joint name="ring_pip" type="hinge" ref="0.0" class="motor" range="0 1.439" axis="0 1 0" />
+          <site name="ring_pip_site" pos="0 0 0" quat="1 0 0 0" />
+          <inertial pos="0.000940340714750308 -1.66667751162405E-05 0.0134216382614548" quat="1.0 0.0 0.0 0.0" mass="0.0027077533496335" diaginertia="2.25767846748625e-07 1.61875511170868e-07 1.17700137222491e-07" />
+          <geom name="ring_middle_collision" pos="0 0 0" quat="1.0 0.0 0.0 0.0" type="mesh" mesh="ring_middle.STL" class="collision" />
+          <geom name="ring_middle_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0"  type="mesh" mesh="ring_middle.STL" class="visual" />
+          <body name="ring_distal" pos="0.00601275714854613 0 0.0264415298059948" quat="1.0 0.0 0.0 0.0">
+            <joint name="ring_dip" type="hinge" ref="0.0" class="motor" range="0 1.3257" axis="0 1 0" />
+            <site name="ring_dip_site" pos="0 0 0" quat="1 0 0 0" />
+            <inertial pos="-0.00679183129010172 -3.1051267307786E-05 0.00565592901618503" quat="1.0 0.0 0.0 0.0" mass="0.00258259127175773" diaginertia="1.36530380213342e-07 1.36471612117152e-07 9.47134934031493e-08" />
+            <geom name="ring_distal_collision" pos="0 0 0" quat="1.0 0.0 0.0 0.0" type="mesh" mesh="ring_distal.STL" class="collision" />
+            <geom name="ring_distal_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0"  type="mesh" mesh="ring_distal.STL" class="visual" />
+            <body name="ring_Virtual_Point" pos="-0.01334 0 0.025167" quat="1.0 0.0 0.0 0.0">
+              <inertial pos="-1.13526896217131E-12 9.35964847292858E-13 5.27355936696949E-16" quat="1.0 0.0 0.0 0.0" mass="5.23598775598299E-07" diaginertia="5.23598775598299e-14 5.23598775598299e-14 5.23598775598299e-14" />
+              <geom name="ring_Virtual_Point_collision" pos="0 0 0" quat="1.0 0.0 0.0 0.0" type="mesh" mesh="ring_Virtual_Point.STL" class="collision" />
+              <geom name="ring_Virtual_Point_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0"  type="mesh" mesh="ring_Virtual_Point.STL" class="visual" />
+            </body>
+          </body>
+        </body>
+      </body>
+      <body name="pinky_proximal" pos="0.000159802654372855 -0.0336303181952511 0.11271621059493" quat="1.0 0.0 0.0 0.0">
+        <joint name="pinky_mcp_pitch" type="hinge" ref="0.0" class="motor" range="0 1.535" axis="0 1 0" />
+        <site name="pinky_mcp_pitch_site" pos="0 0 0" quat="1 0 0 0" />
+        <inertial pos="-0.0016180221168521 -2.08215074695289E-05 0.0212342179851402" quat="1.0 0.0 0.0 0.0" mass="0.00477953323340541" diaginertia="5.43923274544673e-07 5.41640168354855e-07 1.7650175778066e-07" />
+        <geom name="pinky_proximal_collision" pos="0 0 0" quat="1.0 0.0 0.0 0.0" type="mesh" mesh="pinky_proximal.STL" class="collision" />
+        <geom name="pinky_proximal_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0"  type="mesh" mesh="pinky_proximal.STL" class="visual" />
+        <body name="pinky_middle" pos="-0.00392950397727024 0 0.0398303439412377" quat="1.0 0.0 0.0 0.0">
+          <joint name="pinky_pip" type="hinge" ref="0.0" class="motor" range="0 1.413" axis="0 1 0" />
+          <site name="pinky_pip_site" pos="0 0 0" quat="1 0 0 0" />
+          <inertial pos="0.000940340979638598 -1.66665156724755E-05 0.0134216381434371" quat="1.0 0.0 0.0 0.0" mass="0.00270775345292578" diaginertia="2.25767855959524e-07 1.61875516933061e-07 1.17700140839825e-07" />
+          <geom name="pinky_middle_collision" pos="0 0 0" quat="1.0 0.0 0.0 0.0" type="mesh" mesh="pinky_middle.STL" class="collision" />
+          <geom name="pinky_middle_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0"  type="mesh" mesh="pinky_middle.STL" class="visual" />
+          <body name="pinky_distal" pos="0.00601270306428537 0 0.0264416319816371" quat="1.0 0.0 0.0 0.0">
+            <joint name="pinky_dip" type="hinge" ref="0.0" class="motor" range="0 1.325" axis="0 1 0" />
+            <site name="pinky_dip_site" pos="0 0 0" quat="1 0 0 0" />
+            <inertial pos="-0.00679190409450586 -3.10511081597076E-05 0.00565584201307923" quat="1.0 0.0 0.0 0.0" mass="0.00258259141809727" diaginertia="1.36529403216541e-07 1.36471628325979e-07 9.47144825482917e-08" />
+            <geom name="pinky_distal_collision" pos="0 0 0" quat="1.0 0.0 0.0 0.0" type="mesh" mesh="pinky_distal.STL" class="collision" />
+            <geom name="pinky_distal_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0"  type="mesh" mesh="pinky_distal.STL" class="visual" />
+            <body name="pinky_Virtual_Point" pos="-0.0133404537520391 0 0.0251663685805378" quat="1.0 0.0 0.0 0.0">
+              <inertial pos="-2.83552521740393E-12 9.35987398698046E-13 8.32667268468867E-17" quat="1.0 0.0 0.0 0.0" mass="5.23598775598299E-07" diaginertia="5.23598775598299e-14 5.23598775598299e-14 5.23598775598299e-14" />
+              <geom name="pinky_Virtual_Point_collision" pos="0 0 0" quat="1.0 0.0 0.0 0.0" type="mesh" mesh="pinky_Virtual_Point.STL" class="collision" />
+              <geom name="pinky_Virtual_Point_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0"  type="mesh" mesh="pinky_Virtual_Point.STL" class="visual" />
+            </body>
+          </body>
+        </body>
+      </body>
+      <site name="hand_base_link_site" pos="0 0 0" quat="1 0 0 0" />
+      <camera name="front_camera" mode="track" fovy="90.0" quat="4.329780281177467e-17 4.329780281177466e-17 0.7071067811865475 0.7071067811865476" pos="0.0 2.0 0.5" />
+      <camera name="side_camera" mode="track" fovy="90.0" quat="-0.5 -0.4999999999999999 0.5 0.5000000000000001" pos="-2.0 0.0 0.5" />
+    </body>
+  </worldbody>
+
+  <actuator>
+    <motor name="thumb_cmc_roll_ctrl" joint="thumb_cmc_roll" class="motor" />
+    <motor name="thumb_cmc_yaw_ctrl" joint="thumb_cmc_yaw" class="motor" />
+    <motor name="thumb_cmc_pitch_ctrl" joint="thumb_cmc_pitch" class="motor" />
+    <motor name="thumb_mcp_ctrl" joint="thumb_mcp" class="motor" />
+    <motor name="thumb_ip_ctrl" joint="thumb_ip" class="motor" />
+    <motor name="index_mcp_roll_ctrl" joint="index_mcp_roll" class="motor" />
+    <motor name="index_mcp_pitch_ctrl" joint="index_mcp_pitch" class="motor" />
+    <motor name="index_pip_ctrl" joint="index_pip" class="motor" />
+    <motor name="index_dip_ctrl" joint="index_dip" class="motor" />
+    <motor name="middle_mcp_roll_ctrl" joint="middle_mcp_roll" class="motor" />
+    <motor name="middle_mcp_pitch_ctrl" joint="middle_mcp_pitch" class="motor" />
+    <motor name="middle_pip_ctrl" joint="middle_pip" class="motor" />
+    <motor name="middle_dip_ctrl" joint="middle_dip" class="motor" />
+    <motor name="ring_mcp_pitch_ctrl" joint="ring_mcp_pitch" class="motor" />
+    <motor name="ring_pip_ctrl" joint="ring_pip" class="motor" />
+    <motor name="ring_dip_ctrl" joint="ring_dip" class="motor" />
+    <motor name="pinky_mcp_pitch_ctrl" joint="pinky_mcp_pitch" class="motor" />
+    <motor name="pinky_pip_ctrl" joint="pinky_pip" class="motor" />
+    <motor name="pinky_dip_ctrl" joint="pinky_dip" class="motor" />
+  </actuator>
+
+  <contact>
+    <exclude body1="hand_base_link" body2="thumb_metacarpals_base1" />
+    <exclude body1="thumb_metacarpals_base1" body2="thumb_metacarpals_base2" />
+    <exclude body1="thumb_metacarpals_base2" body2="thumb_metacarpals" />
+    <exclude body1="thumb_metacarpals" body2="thumb_proximal" />
+    <exclude body1="thumb_proximal" body2="thumb_distal" />
+    <exclude body1="thumb_distal" body2="thumb_Virtual_Point" />
+    <exclude body1="hand_base_link" body2="index_metacarpals" />
+    <exclude body1="index_metacarpals" body2="index_proximal" />
+    <exclude body1="index_proximal" body2="index_middle" />
+    <exclude body1="index_middle" body2="index_distal" />
+    <exclude body1="index_distal" body2="index_Virtual_Point" />
+    <exclude body1="hand_base_link" body2="middle_metacarpals" />
+    <exclude body1="middle_metacarpals" body2="middle_proximal" />
+    <exclude body1="middle_proximal" body2="middle_middle" />
+    <exclude body1="middle_middle" body2="middle_distal" />
+    <exclude body1="middle_distal" body2="middle_Virtual_Point" />
+    <exclude body1="hand_base_link" body2="ring_proximal" />
+    <exclude body1="ring_proximal" body2="ring_middle" />
+    <exclude body1="ring_middle" body2="ring_distal" />
+    <exclude body1="ring_distal" body2="ring_Virtual_Point" />
+    <exclude body1="hand_base_link" body2="pinky_proximal" />
+    <exclude body1="pinky_proximal" body2="pinky_middle" />
+    <exclude body1="pinky_middle" body2="pinky_distal" />
+    <exclude body1="pinky_distal" body2="pinky_Virtual_Point" />
+  </contact>
+
+  <sensor>
+    <framepos name="thumb_cmc_roll_site_pos" objtype="site" objname="thumb_cmc_roll_site" />
+    <framequat name="thumb_cmc_roll_site_quat" objtype="site" objname="thumb_cmc_roll_site" />
+    <framelinvel name="thumb_cmc_roll_site_linvel" objtype="site" objname="thumb_cmc_roll_site" />
+    <frameangvel name="thumb_cmc_roll_site_angvel" objtype="site" objname="thumb_cmc_roll_site" />
+    <velocimeter name="thumb_cmc_roll_site_vel" site="thumb_cmc_roll_site" />
+  </sensor>
+</mujoco>

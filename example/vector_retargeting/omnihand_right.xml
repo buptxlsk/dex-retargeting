@@ -1,0 +1,220 @@
+<mujoco model="omnihand">
+  <option gravity="0 0 0"/>
+  <default>
+    <default class="robot">
+      <default class="motor">
+        <joint damping="0.01"/>
+        <motor gear="1"/>
+      </default>
+      <default class="visual">
+        <geom material="visualgeom" contype="0" conaffinity="0" group="2" />
+      </default>
+      <default class="collision">
+        <geom material="collision_material" condim="3" contype="0" conaffinity="1" priority="1" group="1" solref="0.005 1" solimp="0.99 0.999 1e-05" friction="1 0.01 0.01" />
+      </default>
+    </default>
+  </default>
+
+  <compiler angle="radian" />
+
+  <asset>
+    <material name="black" rgba="0.0 0.0 0.0 1.0" />
+    <material name="blue" rgba="0.0 0.0 0.8 1.0" />
+    <material name="green" rgba="0.0 0.8 0.0 1.0" />
+    <material name="grey" rgba="0.2 0.2 0.2 1.0" />
+    <material name="silver" rgba="0.9137254901960784 0.9137254901960784 0.8470588235294118 1.0" />
+    <material name="orange" rgba="1.0 0.4235294117647059 0.0392156862745098 1.0" />
+    <material name="brown" rgba="0.8705882352941177 0.8117647058823529 0.7647058823529411 1.0" />
+    <material name="red" rgba="0.8 0.0 0.0 1.0" />
+    <material name="white" rgba="1.0 1.0 1.0 1.0" />
+    <material name="default_material" rgba="0.7 0.7 0.7 1" />
+    <material name="collision_material" rgba="1.0 0.28 0.1 0.9" />
+    <mesh name="r_palm.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/omnihand_description/meshes/r_palm.STL" />
+    <mesh name="r_thumb_roll.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/omnihand_description/meshes/r_thumb_roll.STL" />
+    <mesh name="thumb_abad.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/omnihand_description/meshes/thumb_abad.STL" />
+    <mesh name="thumb_mcp.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/omnihand_description/meshes/thumb_mcp.STL" />
+    <mesh name="thumb_pip.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/omnihand_description/meshes/thumb_pip.STL" />
+    <mesh name="thumb_dip.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/omnihand_description/meshes/thumb_dip.STL" />
+    <mesh name="finger_abad.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/omnihand_description/meshes/finger_abad.STL" />
+    <mesh name="finger_pip.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/omnihand_description/meshes/finger_pip.STL" />
+    <mesh name="finger_dip.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/omnihand_description/meshes/finger_dip.STL" />
+  </asset>
+
+  <worldbody>
+    <body name="base_link" pos="0.00000000 0.00000000 0.00050000" quat="1 0 0 0" childclass="robot">
+      <freejoint name="floating_base" />
+      <geom name="base_link_visual" pos="0.0 0.0 0.0" quat="1.0 0.0 0.0 0.0" material="default_material" type="box" size="0.0005 0.0005 0.0005" class="visual" />
+      <body name="R_palm" pos="0.0 0.0 0.0" quat="1.0 0.0 0.0 0.0">
+        <inertial pos="-0.0071151 0.0044599 0.0455754" quat="1.0 0.0 0.0 0.0" mass="0.2175" diaginertia="0.00023334 0.00020584 0.00012494" />
+        <geom name="R_palm_collision_0" pos="0 0 0.00725" quat="1.0 0.0 0.0 0.0" type="cylinder" size="0.028 0.00725" class="collision" />
+        <geom name="R_palm_collision_1" pos="0 0 0.057" quat="1.0 0.0 0.0 0.0" type="box" size="0.02 0.041 0.0425" class="collision" />
+        <geom name="R_palm_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0" material="silver" type="mesh" mesh="r_palm.STL" class="visual" />
+        <body name="R_thumb_roll" pos="0 0.018529 0.046851" quat="1.0 0.0 0.0 0.0">
+          <joint name="R_thumb_roll_joint" type="hinge" ref="0.0" class="motor" range="-0.17453292519943295 0.8726646259971648" axis="1 0 0" />
+          <site name="R_thumb_roll_joint_site" pos="0 0 0" quat="1 0 0 0" />
+          <inertial pos="0.018588 -0.0062386 0.0002106" quat="1.0 0.0 0.0 0.0" mass="0.0179" diaginertia="3.64e-06 2.68e-06 1.76e-06" />
+          <geom name="R_thumb_roll_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0" material="blue" type="mesh" mesh="r_thumb_roll.STL" class="visual" />
+          <body name="R_thumb_abad" pos="0.020033 0.004292 0.00075" quat="1.0 0.0 0.0 0.0">
+            <joint name="R_thumb_abad_joint" type="hinge" ref="0.0" class="motor" range="-1.7453292519943295 0" axis="0 0 1" />
+            <site name="R_thumb_abad_joint_site" pos="0 0 0" quat="1 0 0 0" />
+            <inertial pos="0.0 0.0120925 -0.0060829" quat="1.0 0.0 0.0 0.0" mass="0.0061" diaginertia="1.21e-06 9.8e-07 6e-07" />
+            <geom name="R_thumb_abad_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0" material="blue" type="mesh" mesh="thumb_abad.STL" class="visual" />
+            <body name="R_thumb_mcp" pos="0 0.0265 -0.0058001" quat="1.0 0.0 0.0 0.0">
+              <joint name="R_thumb_mcp_joint" type="hinge" ref="0.0" class="motor" range="0 0.8552113334772214" axis="1 0 0" />
+              <site name="R_thumb_mcp_joint_site" pos="0 0 0" quat="1 0 0 0" />
+              <inertial pos="-1.45e-05 0.019045 0.0020161" quat="1.0 0.0 0.0 0.0" mass="0.045" diaginertia="1.149e-05 5.16e-06 1.049e-05" />
+              <geom name="R_thumb_mcp_collision" pos="0 0.0065 0.00237" quat="1.0 0.0 0.0 0.0" type="box" size="0.0145 0.021 0.01625" class="collision" />
+              <geom name="R_thumb_mcp_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0" material="brown" type="mesh" mesh="thumb_mcp.STL" class="visual" />
+              <body name="R_thumb_pip" pos="0 0.036229 0.0026606" quat="1.0 0.0 0.0 0.0">
+                <joint name="R_thumb_pip_joint" type="hinge" ref="0.0" class="motor" range="0 1.1344640137963142" axis="1 0 0" />
+                <site name="R_thumb_pip_joint_site" pos="0 0 0" quat="1 0 0 0" />
+                <inertial pos="0.0004121 0.0066398 -0.0025675" quat="1.0 0.0 0.0 0.0" mass="0.0284" diaginertia="4.53e-06 2.5e-06 4e-06" />
+                <geom name="R_thumb_pip_collision" pos="0 0.0116 -0.0032" quat="0.9950041652780258 -0.09983341664682815 0.0 0.0" type="box" size="0.0095 0.0175 0.01125" class="collision" />
+                <geom name="R_thumb_pip_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0" material="white" type="mesh" mesh="thumb_pip.STL" class="visual" />
+                <body name="R_thumb_dip" pos="0 0.026054 -0.008672" quat="1.0 0.0 0.0 0.0">
+                  <joint name="R_thumb_dip_joint" type="hinge" ref="0.0" class="motor" range="0 1.1344640137963142" axis="1 0 0" />
+                  <site name="R_thumb_dip_joint_site" pos="0 0 0" quat="1 0 0 0" />
+                  <inertial pos="-0.0001343 0.0104003 -0.0042117" quat="1.0 0.0 0.0 0.0" mass="0.011" diaginertia="1.1e-06 7.5e-07 1.01e-06" />
+                  <geom name="R_thumb_dip_collision" pos="0 0.0134 -0.0026" quat="0.6216099682706644 -0.7833269096274834 0.0 0.0" type="cylinder" size="0.011 0.0115" class="collision" />
+                  <geom name="R_thumb_dip_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0" material="white" type="mesh" mesh="thumb_dip.STL" class="visual" />
+                  <body name="R_thumb_tip" pos="0 0.02311 -0.01374" quat="1.0 0.0 0.0 0.0">
+                    <geom name="R_thumb_tip_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0" material="white" type="sphere" size="1e-3" class="visual" />
+                  </body>
+                </body>
+              </body>
+            </body>
+          </body>
+        </body>
+        <body name="R_index_abad" pos="-0.00069782 0.026958 0.094423" quat="1.0 0.0 0.0 0.0">
+          <joint name="R_index_abad_joint" type="hinge" ref="0.0" class="motor" range="-0.20943951023931953 0" axis="1 0 0" />
+          <site name="R_index_abad_joint_site" pos="0 0 0" quat="1 0 0 0" />
+          <inertial pos="-0.0009337 -2.37e-05 0.0063625" quat="1.0 0.0 0.0 0.0" mass="0.0349" diaginertia="6.74e-06 7.81e-06 2.37e-06" />
+          <geom name="R_index_abad_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0" material="green" type="mesh" mesh="finger_abad.STL" class="visual" />
+          <body name="R_index_pip" pos="0.001025 0 0.017575" quat="1.0 0.0 0.0 0.0">
+            <joint name="R_index_pip_joint" type="hinge" ref="0.0" class="motor" range="0 1.5707963267948966" axis="0 1 0" />
+            <site name="R_index_pip_joint_site" pos="0 0 0" quat="1 0 0 0" />
+            <inertial pos="-0.0009312 -9.8e-06 0.0120489" quat="1.0 0.0 0.0 0.0" mass="0.0125" diaginertia="3.16e-06 3.23e-06 6.3e-07" />
+            <geom name="R_index_pip_collision" pos="0 0 0.014" quat="1.0 0.0 0.0 0.0" type="cylinder" size="0.01 0.022" class="collision" />
+            <geom name="R_index_pip_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0" material="brown" type="mesh" mesh="finger_pip.STL" class="visual" />
+            <body name="R_index_dip" pos=" -0.0014266  0 0.036" quat="1.0 0.0 0.0 0.0">
+              <joint name="R_index_dip_joint" type="hinge" ref="0.0" class="motor" range="0 1.8325957145940461" axis="0 1 0" />
+              <site name="R_index_dip_joint_site" pos="0 0 0" quat="1 0 0 0" />
+              <inertial pos="0.0002904 4.82e-05 0.0167403" quat="1.0 0.0 0.0 0.0" mass="0.0047" diaginertia="7.6e-07 7.7e-07 1.6e-07" />
+              <geom name="R_index_dip_collision" pos="0 0 0.018" quat="1.0 0.0 0.0 0.0" type="cylinder" size="0.007 0.017" class="collision" />
+              <geom name="R_index_dip_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0" material="orange" type="mesh" mesh="finger_dip.STL" class="visual" />
+              <body name="R_index_tip" pos="-0.00131 0 0.03841" quat="1.0 0.0 0.0 0.0">
+                <geom name="R_index_tip_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0" material="white" type="sphere" size="1e-3" class="visual" />
+              </body>
+            </body>
+          </body>
+        </body>
+        <body name="R_middle_abad" pos="-0.0031978 0.0079501 0.096423" quat="1.0 0.0 0.0 0.0">
+          <inertial pos="-0.0009337 -2.37e-05 0.0063625" quat="1.0 0.0 0.0 0.0" mass="0.0349" diaginertia="6.74e-06 7.81e-06 2.37e-06" />
+          <geom name="R_middle_abad_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0" material="green" type="mesh" mesh="finger_abad.STL" class="visual" />
+          <body name="R_middle_pip" pos="0.001025 0 0.017575" quat="1.0 0.0 0.0 0.0">
+            <joint name="R_middle_pip_joint" type="hinge" ref="0.0" class="motor" range="0 1.5707963267948966" axis="0 1 0" />
+            <site name="R_middle_pip_joint_site" pos="0 0 0" quat="1 0 0 0" />
+            <inertial pos="-0.0009312 -9.8e-06 0.0120489" quat="1.0 0.0 0.0 0.0" mass="0.0125" diaginertia="3.16e-06 3.23e-06 6.3e-07" />
+            <geom name="R_middle_pip_collision" pos="0 0 0.014" quat="1.0 0.0 0.0 0.0" type="cylinder" size="0.01 0.022" class="collision" />
+            <geom name="R_middle_pip_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0" material="brown" type="mesh" mesh="finger_pip.STL" class="visual" />
+            <body name="R_middle_dip" pos=" -0.0014266  0 0.036" quat="1.0 0.0 0.0 0.0">
+              <joint name="R_middle_dip_joint" type="hinge" ref="0.0" class="motor" range="0 1.8325957145940461" axis="0 1 0" />
+              <site name="R_middle_dip_joint_site" pos="0 0 0" quat="1 0 0 0" />
+              <inertial pos="0.0002904 4.82e-05 0.0167403" quat="1.0 0.0 0.0 0.0" mass="0.0047" diaginertia="7.6e-07 7.7e-07 1.6e-07" />
+              <geom name="R_middle_dip_collision" pos="0 0 0.018" quat="1.0 0.0 0.0 0.0" type="cylinder" size="0.007 0.017" class="collision" />
+              <geom name="R_middle_dip_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0" material="orange" type="mesh" mesh="finger_dip.STL" class="visual" />
+              <body name="R_middle_tip" pos="-0.00131 0 0.03841" quat="1.0 0.0 0.0 0.0">
+                <geom name="R_middle_tip_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0" material="white" type="sphere" size="1e-3" class="visual" />
+              </body>
+            </body>
+          </body>
+        </body>
+        <body name="R_ring_abad" pos="-0.0021978 -0.01105 0.094423" quat="1.0 0.0 0.0 0.0">
+          <joint name="R_ring_abad_joint" type="hinge" ref="0.0" class="motor" range="0 0.17453292519943295" axis="1 0 0" />
+          <site name="R_ring_abad_joint_site" pos="0 0 0" quat="1 0 0 0" />
+          <inertial pos="-0.0009337 -2.37e-05 0.0063625" quat="1.0 0.0 0.0 0.0" mass="0.0349" diaginertia="6.74e-06 7.81e-06 2.37e-06" />
+          <geom name="R_ring_abad_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0" material="green" type="mesh" mesh="finger_abad.STL" class="visual" />
+          <body name="R_ring_pip" pos="0.001025 0 0.017575" quat="1.0 0.0 0.0 0.0">
+            <joint name="R_ring_pip_joint" type="hinge" ref="0.0" class="motor" range="0 1.5707963267948966" axis="0 1 0" />
+            <site name="R_ring_pip_joint_site" pos="0 0 0" quat="1 0 0 0" />
+            <inertial pos="-0.0009312 -9.8e-06 0.0120489" quat="1.0 0.0 0.0 0.0" mass="0.0125" diaginertia="3.16e-06 3.23e-06 6.3e-07" />
+            <geom name="R_ring_pip_collision" pos="0 0 0.014" quat="1.0 0.0 0.0 0.0" type="cylinder" size="0.01 0.022" class="collision" />
+            <geom name="R_ring_pip_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0" material="brown" type="mesh" mesh="finger_pip.STL" class="visual" />
+            <body name="R_ring_dip" pos=" -0.0014266  0 0.036" quat="1.0 0.0 0.0 0.0">
+              <joint name="R_ring_dip_joint" type="hinge" ref="0.0" class="motor" range="0 1.8325957145940461" axis="0 1 0" />
+              <site name="R_ring_dip_joint_site" pos="0 0 0" quat="1 0 0 0" />
+              <inertial pos="0.0002904 4.82e-05 0.0167403" quat="1.0 0.0 0.0 0.0" mass="0.0047" diaginertia="7.6e-07 7.7e-07 1.6e-07" />
+              <geom name="R_ring_dip_collision" pos="0 0 0.018" quat="1.0 0.0 0.0 0.0" type="cylinder" size="0.007 0.017" class="collision" />
+              <geom name="R_ring_dip_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0" material="orange" type="mesh" mesh="finger_dip.STL" class="visual" />
+              <body name="R_ring_tip" pos="-0.00131 0 0.03841" quat="1.0 0.0 0.0 0.0">
+                <geom name="R_ring_tip_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0" material="white" type="sphere" size="1e-3" class="visual" />
+              </body>
+            </body>
+          </body>
+        </body>
+        <body name="R_pinky_abad" pos="-0.00069782 -0.03005 0.089423" quat="1.0 0.0 0.0 0.0">
+          <joint name="R_pinky_abad_joint" type="hinge" ref="0.0" class="motor" range="0 0.20943951023931953" axis="1 0 0" />
+          <site name="R_pinky_abad_joint_site" pos="0 0 0" quat="1 0 0 0" />
+          <inertial pos="-0.0009337 -2.37e-05 0.0063625" quat="1.0 0.0 0.0 0.0" mass="0.0349" diaginertia="6.74e-06 7.81e-06 2.37e-06" />
+          <geom name="R_pinky_abad_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0" material="green" type="mesh" mesh="finger_abad.STL" class="visual" />
+          <body name="R_pinky_pip" pos="0.001025 0 0.017575" quat="1.0 0.0 0.0 0.0">
+            <joint name="R_pinky_pip_joint" type="hinge" ref="0.0" class="motor" range="0 1.5707963267948966" axis="0 1 0" />
+            <site name="R_pinky_pip_joint_site" pos="0 0 0" quat="1 0 0 0" />
+            <inertial pos="-0.0009312 -9.8e-06 0.0120489" quat="1.0 0.0 0.0 0.0" mass="0.0125" diaginertia="3.16e-06 3.23e-06 6.3e-07" />
+            <geom name="R_pinky_pip_collision" pos="0 0 0.014" quat="1.0 0.0 0.0 0.0" type="cylinder" size="0.01 0.022" class="collision" />
+            <geom name="R_pinky_pip_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0" material="brown" type="mesh" mesh="finger_pip.STL" class="visual" />
+            <body name="R_pinky_dip" pos=" -0.0014266  0 0.036" quat="1.0 0.0 0.0 0.0">
+              <joint name="R_pinky_dip_joint" type="hinge" ref="0.0" class="motor" range="0 1.8325957145940461" axis="0 1 0" />
+              <site name="R_pinky_dip_joint_site" pos="0 0 0" quat="1 0 0 0" />
+              <inertial pos="0.0002904 4.82e-05 0.0167403" quat="1.0 0.0 0.0 0.0" mass="0.0047" diaginertia="7.6e-07 7.7e-07 1.6e-07" />
+              <geom name="R_pinky_dip_collision" pos="0 0 0.018" quat="1.0 0.0 0.0 0.0" type="cylinder" size="0.007 0.017" class="collision" />
+              <geom name="R_pinky_dip_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0" material="orange" type="mesh" mesh="finger_dip.STL" class="visual" />
+              <body name="R_pinky_tip" pos="-0.00131 0 0.03841" quat="1.0 0.0 0.0 0.0">
+                <geom name="R_pinky_tip_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0" material="white" type="sphere" size="1e-3" class="visual" />
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+      <site name="base_link_site" pos="0 0 0" quat="1 0 0 0" />
+      <camera name="front_camera" mode="track" fovy="90.0" quat="4.329780281177467e-17 4.329780281177466e-17 0.7071067811865475 0.7071067811865476" pos="0.0 2.0 0.5" />
+      <camera name="side_camera" mode="track" fovy="90.0" quat="-0.5 -0.4999999999999999 0.5 0.5000000000000001" pos="-2.0 0.0 0.5" />
+    </body>
+  </worldbody>
+
+  <actuator>
+    <motor name="R_thumb_roll_joint_ctrl" joint="R_thumb_roll_joint" class="motor" />
+    <motor name="R_thumb_abad_joint_ctrl" joint="R_thumb_abad_joint" class="motor" />
+    <motor name="R_thumb_mcp_joint_ctrl" joint="R_thumb_mcp_joint" class="motor" />
+    <motor name="R_thumb_pip_joint_ctrl" joint="R_thumb_pip_joint" class="motor" />
+    <motor name="R_thumb_dip_joint_ctrl" joint="R_thumb_dip_joint" class="motor" />
+    <motor name="R_index_abad_joint_ctrl" joint="R_index_abad_joint" class="motor" />
+    <motor name="R_index_pip_joint_ctrl" joint="R_index_pip_joint" class="motor" />
+    <motor name="R_index_dip_joint_ctrl" joint="R_index_dip_joint" class="motor" />
+    <motor name="R_middle_pip_joint_ctrl" joint="R_middle_pip_joint" class="motor" />
+    <motor name="R_middle_dip_joint_ctrl" joint="R_middle_dip_joint" class="motor" />
+    <motor name="R_ring_abad_joint_ctrl" joint="R_ring_abad_joint" class="motor" />
+    <motor name="R_ring_pip_joint_ctrl" joint="R_ring_pip_joint" class="motor" />
+    <motor name="R_ring_dip_joint_ctrl" joint="R_ring_dip_joint" class="motor" />
+    <motor name="R_pinky_abad_joint_ctrl" joint="R_pinky_abad_joint" class="motor" />
+    <motor name="R_pinky_pip_joint_ctrl" joint="R_pinky_pip_joint" class="motor" />
+    <motor name="R_pinky_dip_joint_ctrl" joint="R_pinky_dip_joint" class="motor" />
+  </actuator>
+
+  <contact>
+    <exclude body1="R_thumb_mcp" body2="R_thumb_pip" />
+    <exclude body1="R_thumb_pip" body2="R_thumb_dip" />
+    <exclude body1="R_index_pip" body2="R_index_dip" />
+    <exclude body1="R_middle_pip" body2="R_middle_dip" />
+    <exclude body1="R_ring_pip" body2="R_ring_dip" />
+    <exclude body1="R_pinky_pip" body2="R_pinky_dip" />
+  </contact>
+
+  <sensor>
+    <framepos name="R_thumb_roll_joint_site_pos" objtype="site" objname="R_thumb_roll_joint_site" />
+    <framequat name="R_thumb_roll_joint_site_quat" objtype="site" objname="R_thumb_roll_joint_site" />
+    <framelinvel name="R_thumb_roll_joint_site_linvel" objtype="site" objname="R_thumb_roll_joint_site" />
+    <frameangvel name="R_thumb_roll_joint_site_angvel" objtype="site" objname="R_thumb_roll_joint_site" />
+    <velocimeter name="R_thumb_roll_joint_site_vel" site="R_thumb_roll_joint_site" />
+  </sensor>
+</mujoco>
