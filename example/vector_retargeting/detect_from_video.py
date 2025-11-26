@@ -20,12 +20,9 @@ from single_hand_detector import SingleHandDetector
 # 统一的 thumb offset（和 MuJoCo 那份一致）
 # -----------------------------
 THUMB_OFFSETS = {
-    # "thumb_cmc_roll":   0.0,
-    # "thumb_cmc_yaw":    0.0,
-    # "thumb_cmc_pitch":  0.0,  
-    "R_thumb_roll_joint": -0.191,
-    "R_thumb_abad_joint": 0.0434,
-    "R_thumb_mcp_joint": 0.912,
+    # "thumb_cmc_roll":   -0.3,
+    # "thumb_cmc_yaw":    -0.9,
+    # "thumb_cmc_pitch":  -0.35, 
 }
 
 

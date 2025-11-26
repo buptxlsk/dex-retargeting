@@ -155,12 +155,9 @@ def start_retargeting_mujoco(
 
     # ⭐ 这就是你从 Joint 面板抄下来的“理想拇指姿态” offset：
     thumb_offsets = {
-        # "thumb_cmc_roll":  0.0,
-        # "thumb_cmc_yaw":   0.0,
-        # "thumb_cmc_pitch":  0.0,
-        # "R_thumb_roll_joint": -0.191,
-        # "R_thumb_abad_joint": 0.0434,
-        # "R_thumb_mcp_joint": 0.912,
+        "thumb_cmc_roll":   -0.3,
+        "thumb_cmc_yaw":    -0.7,
+        "thumb_cmc_pitch":  -0.35, 
     }
 
     # 先把初始 qpos 设成带 offset 的静态姿态（这样一打开 viewer 第一帧就是你想要的）

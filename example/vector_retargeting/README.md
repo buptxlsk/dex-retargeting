@@ -6,7 +6,7 @@
 
 ```shell
 cd example/vector_retargeting
-python3 detect_from_video_analyze.py \
+python3 detect_from_video.py \
   --robot-name omni \
   --video-path data/human_hand_video.mp4 \
   --retargeting-type dexpilot \
