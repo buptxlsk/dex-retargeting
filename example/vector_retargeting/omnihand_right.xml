@@ -29,15 +29,15 @@
     <material name="white" rgba="1.0 1.0 1.0 1.0" />
     <material name="default_material" rgba="0.7 0.7 0.7 1" />
     <material name="collision_material" rgba="1.0 0.28 0.1 0.9" />
-    <mesh name="r_palm.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/omnihand_description/meshes/r_palm.STL" />
-    <mesh name="r_thumb_roll.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/omnihand_description/meshes/r_thumb_roll.STL" />
-    <mesh name="thumb_abad.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/omnihand_description/meshes/thumb_abad.STL" />
-    <mesh name="thumb_mcp.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/omnihand_description/meshes/thumb_mcp.STL" />
-    <mesh name="thumb_pip.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/omnihand_description/meshes/thumb_pip.STL" />
-    <mesh name="thumb_dip.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/omnihand_description/meshes/thumb_dip.STL" />
-    <mesh name="finger_abad.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/omnihand_description/meshes/finger_abad.STL" />
-    <mesh name="finger_pip.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/omnihand_description/meshes/finger_pip.STL" />
-    <mesh name="finger_dip.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/omnihand_description/meshes/finger_dip.STL" />
+    <mesh name="r_palm.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/omni_hand/meshes/r_palm.STL" />
+    <mesh name="r_thumb_roll.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/omni_hand/meshes/r_thumb_roll.STL" />
+    <mesh name="thumb_abad.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/omni_hand/meshes/thumb_abad.STL" />
+    <mesh name="thumb_mcp.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/omni_hand/meshes/thumb_mcp.STL" />
+    <mesh name="thumb_pip.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/omni_hand/meshes/thumb_pip.STL" />
+    <mesh name="thumb_dip.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/omni_hand/meshes/thumb_dip.STL" />
+    <mesh name="finger_abad.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/omni_hand/meshes/finger_abad.STL" />
+    <mesh name="finger_pip.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/omni_hand/meshes/finger_pip.STL" />
+    <mesh name="finger_dip.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/omni_hand/meshes/finger_dip.STL" />
   </asset>
 
   <worldbody>

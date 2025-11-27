@@ -31,7 +31,7 @@ def render_by_sapien(
         sapien.render.set_camera_shader_dir("rt")
         sapien.render.set_ray_tracing_samples_per_pixel(16)
         sapien.render.set_ray_tracing_path_depth(8)
-        sapien.render.set_ray_tracing_denoiser("oidn")
+        # sapien.render.set_ray_tracing_denoiser("oidn")
 
     # Config is loaded only to find the urdf path and robot name
     config_path = meta_data["config_path"]

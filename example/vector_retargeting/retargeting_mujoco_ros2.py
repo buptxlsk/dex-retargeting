@@ -153,21 +153,6 @@ def start_retargeting_mujoco(
             f"The following retargeting DOF joints not found in MuJoCo model: {missing}"
         )
 
-    # ⭐ 这就是你从 Joint 面板抄下来的“理想拇指姿态” offset：
-    thumb_offsets = {
-        "thumb_cmc_roll":   -0.3,
-        "thumb_cmc_yaw":    -0.7,
-        "thumb_cmc_pitch":  -0.35, 
-    }
-
-    # 先把初始 qpos 设成带 offset 的静态姿态（这样一打开 viewer 第一帧就是你想要的）
-    for jname, val in thumb_offsets.items():
-        if jname in name_to_qpos:
-            adr = name_to_qpos[jname]
-            mj_data.qpos[adr] = val
-        else:
-            logger.warning(f"[thumb offset] joint {jname} not found in mj_model")
-
     mujoco.mj_forward(mj_model, mj_data)
 
     # --- 主循环：MuJoCo viewer + retargeting ---
@@ -216,10 +201,6 @@ def start_retargeting_mujoco(
                             continue
                         adr = name_to_qpos[name]
                         val = qpos[i]
-
-                        if name in thumb_offsets:
-                            val += thumb_offsets[name]
-
                         mj_data.qpos[adr] = val
 
                 # 子步积分（有点物理感，虽然你重力关了）

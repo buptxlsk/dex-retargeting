@@ -28,23 +28,11 @@ class SeqRetargeting:
             joint_limits[:] = robot.joint_limits[:]
             self.optimizer.set_joint_limit(joint_limits[self.optimizer.idx_pin2target])
         self.joint_limits = joint_limits[self.optimizer.idx_pin2target]
+
         # Temporal information
-        # self.last_qpos = joint_limits.mean(1)[self.optimizer.idx_pin2target].astype(
-        #     np.float32
-        # )
-        # Temporal information
-
-        self.last_qpos = self.joint_limits.mean(1).astype(np.float32)
-
-        alpha = 0.5 
-        for name in ["thumb_cmc_roll", "thumb_cmc_yaw", "thumb_cmc_pitch","thumb_mcp","thumb_ip"]:
-            if name in self.optimizer.target_joint_names:
-                k = self.optimizer.target_joint_names.index(name)
-                lower = self.joint_limits[k, 0]
-                upper = self.joint_limits[k, 1]
-                self.last_qpos[k] = (1 - alpha) * lower + alpha * upper
-
-
+        self.last_qpos = joint_limits.mean(1)[self.optimizer.idx_pin2target].astype(
+            np.float32
+        )
         self.accumulated_time = 0
         self.num_retargeting = 0
 
@@ -165,13 +153,6 @@ class SeqRetargeting:
 
     def reset(self):
         self.last_qpos = self.joint_limits.mean(1).astype(np.float32)
-        alpha = 0.5 
-        for name in ["thumb_cmc_roll", "thumb_cmc_yaw", "thumb_cmc_pitch","thumb_mcp","thumb_ip"]:
-            if name in self.optimizer.target_joint_names:
-                k = self.optimizer.target_joint_names.index(name)
-                lower = self.joint_limits[k, 0]
-                upper = self.joint_limits[k, 1]
-                self.last_qpos[k] = (1 - alpha) * lower + alpha * upper
         self.num_retargeting = 0
         self.accumulated_time = 0
 
