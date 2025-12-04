@@ -83,11 +83,10 @@ effort: []
 
 若正常显示，打通链路如下：
 ```mermaid
-graph TD;
-  A[/vrpn/hand_kp：bag 播放出的 VRPN 手部 3D 关键点]-->
-  B[ROS2LandmarkSubscriber：把 PoseArray → 21×3，归一化+旋转];
-  B-->C[优化器（DexPilot/Vector）：吃 3D 向量 → 求解 omnihand 的关节角];
-  C-->D[/joint_commands：按 SAPIEN 关节顺序发布关节角 JointState];
+graph TD
+    A[/vrpn/hand_kp：bag 播放出的 VRPN 手部 3D 关键点] --> B[ROS2LandmarkSubscriber：把 PoseArray → 21×3，归一化+旋转]
+    B --> C[优化器（DexPilot/Vector）：吃 3D 向量 → 求解 omnihand 的关节角]
+    C --> D[/joint_commands：按 SAPIEN 关节顺序发布关节角 JointState]
 ```
 
 **4. 将输出转换为SAPIEN 3D 窗口中手部模型的运动**
