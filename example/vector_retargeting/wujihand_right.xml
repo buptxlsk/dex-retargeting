@@ -1,0 +1,285 @@
+<mujoco model="wujihand-right-v1.0.1">
+  <default>
+    <default class="robot">
+      <default class="motor">
+        <joint damping="0.01"/>
+        <motor gear="1"/>
+      </default>
+      <default class="visual">
+        <geom material="visualgeom" contype="0" conaffinity="0" group="2" />
+      </default>
+      <default class="collision">
+        <geom material="collision_material" condim="3" contype="0" conaffinity="1" priority="1" group="1" solref="0.005 1" solimp="0.99 0.999 1e-05" friction="1 0.01 0.01" />
+      </default>
+    </default>
+  </default>
+
+  <compiler angle="radian" />
+
+  <asset>
+    <material name="base_material" rgba="0.89804 0.91765 0.92941 1" />
+    <material name="default_material" rgba="0.7 0.7 0.7 1" />
+    <material name="collision_material" rgba="1.0 0.28 0.1 0.9" />
+    <mesh name="palm_link.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/wuji_hand/meshes/palm_link.STL" />
+    <mesh name="finger1_link1.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/wuji_hand/meshes/finger1_link1.STL" />
+    <mesh name="finger1_link2.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/wuji_hand/meshes/finger1_link2.STL" />
+    <mesh name="finger1_link3.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/wuji_hand/meshes/finger1_link3.STL" />
+    <mesh name="finger1_link4.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/wuji_hand/meshes/finger1_link4.STL" />
+    <mesh name="finger1_tip_link.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/wuji_hand/meshes/finger1_tip_link.STL" />
+    <mesh name="finger2_link1.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/wuji_hand/meshes/finger2_link1.STL" />
+    <mesh name="finger2_link2.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/wuji_hand/meshes/finger2_link2.STL" />
+    <mesh name="finger2_link3.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/wuji_hand/meshes/finger2_link3.STL" />
+    <mesh name="finger2_link4.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/wuji_hand/meshes/finger2_link4.STL" />
+    <mesh name="finger2_tip_link.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/wuji_hand/meshes/finger2_tip_link.STL" />
+    <mesh name="finger3_link1.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/wuji_hand/meshes/finger3_link1.STL" />
+    <mesh name="finger3_link2.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/wuji_hand/meshes/finger3_link2.STL" />
+    <mesh name="finger3_link3.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/wuji_hand/meshes/finger3_link3.STL" />
+    <mesh name="finger3_link4.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/wuji_hand/meshes/finger3_link4.STL" />
+    <mesh name="finger3_tip_link.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/wuji_hand/meshes/finger3_tip_link.STL" />
+    <mesh name="finger4_link1.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/wuji_hand/meshes/finger4_link1.STL" />
+    <mesh name="finger4_link2.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/wuji_hand/meshes/finger4_link2.STL" />
+    <mesh name="finger4_link3.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/wuji_hand/meshes/finger4_link3.STL" />
+    <mesh name="finger4_link4.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/wuji_hand/meshes/finger4_link4.STL" />
+    <mesh name="finger4_tip_link.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/wuji_hand/meshes/finger4_tip_link.STL" />
+    <mesh name="finger5_link1.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/wuji_hand/meshes/finger5_link1.STL" />
+    <mesh name="finger5_link2.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/wuji_hand/meshes/finger5_link2.STL" />
+    <mesh name="finger5_link3.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/wuji_hand/meshes/finger5_link3.STL" />
+    <mesh name="finger5_link4.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/wuji_hand/meshes/finger5_link4.STL" />
+    <mesh name="finger5_tip_link.STL" file="/home/user/code/dex-retargeting/assets/robots/hands/wuji_hand/meshes/finger5_tip_link.STL" />
+  </asset>
+
+  <worldbody>
+    <body name="palm_link" pos="0.00000000 0.00000000 0.00000000" quat="1 0 0 0" childclass="robot">
+      <freejoint name="floating_base" />
+      <geom name="palm_link_collision" pos="0 0 0" quat="1.0 0.0 0.0 0.0" type="mesh" mesh="palm_link.STL" class="collision" />
+      <geom name="palm_link_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0" material="" type="mesh" mesh="palm_link.STL" class="visual" />
+      <body name="finger1_link1" pos="0.0085244 0.020575 0.028712" quat="0.6822193668878683 -0.6176690399171142 0.08050471975634982 -0.3828585674474818">
+        <joint name="finger1_joint1" type="hinge" ref="0.0" class="motor" range="-0.0448 1.6508" axis="-0 1 -0" />
+        <site name="finger1_joint1_site" pos="0 0 0" quat="1 0 0 0" />
+        <inertial pos="-0.0024628 -0.0014428 0.0077802" quat="1.0 0.0 0.0 0.0" mass="0.0075" diaginertia="1.4319e-07 1.307e-07 1.0259e-07" />
+        <geom name="finger1_link1_collision" pos="0 0 0" quat="1.0 0.0 0.0 0.0" type="mesh" mesh="finger1_link1.STL" class="collision" />
+        <geom name="finger1_link1_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0" material="" type="mesh" mesh="finger1_link1.STL" class="visual" />
+        <body name="finger1_link2" pos="-0.0047549 -0.0060191 0.014132" quat="0.6169553998104378 -0.08559011310251208 -0.2908511877831008 0.7262547443900119">
+          <joint name="finger1_joint2" type="hinge" ref="0.0" class="motor" range="-0.1659 0.9339" axis="-0 -1 -0" />
+          <site name="finger1_joint2_site" pos="0 0 0" quat="1 0 0 0" />
+          <inertial pos="0.0011196 -1.2405E-05 0.015663" quat="1.0 0.0 0.0 0.0" mass="0.0248" diaginertia="1.6585e-06 1.694e-06 4.1017e-07" />
+          <geom name="finger1_link2_collision" pos="0 0 0" quat="1.0 0.0 0.0 0.0" type="mesh" mesh="finger1_link2.STL" class="collision" />
+          <geom name="finger1_link2_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0" material="" type="mesh" mesh="finger1_link2.STL" class="visual" />
+          <body name="finger1_link3" pos="0.00018873 -0.0009916 0.034664" quat="0.5778521318963106 0.021238264437404536 -0.015003078468106605 -0.8157271341711366">
+            <joint name="finger1_joint3" type="hinge" ref="0.0" class="motor" range="-0.4932 1.6272" axis="0 1 0" />
+            <site name="finger1_joint3_site" pos="0 0 0" quat="1 0 0 0" />
+            <inertial pos="-0.0011235 -1.579E-05 0.013056" quat="1.0 0.0 0.0 0.0" mass="0.0165" diaginertia="1.0981e-06 1.0736e-06 3.3917e-07" />
+            <geom name="finger1_link3_collision" pos="0 0 0" quat="1.0 0.0 0.0 0.0" type="mesh" mesh="finger1_link3.STL" class="collision" />
+            <geom name="finger1_link3_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0" material="" type="mesh" mesh="finger1_link3.STL" class="visual" />
+            <body name="finger1_link4" pos="0 -0.00025 0.0295" quat="1.0 0.0 0.0 0.0">
+              <joint name="finger1_joint4" type="hinge" ref="0.0" class="motor" range="-0.4932 1.6272" axis="0 1 0" />
+              <site name="finger1_joint4_site" pos="0 0 0" quat="1 0 0 0" />
+              <inertial pos="-0.0011922 0.00023589 0.0082118" quat="1.0 0.0 0.0 0.0" mass="0.0165" diaginertia="3.6732e-07 3.7712e-07 2.1481e-07" />
+              <geom name="finger1_link4_collision" pos="0 0 0" quat="1.0 0.0 0.0 0.0" type="mesh" mesh="finger1_link4.STL" class="collision" />
+              <geom name="finger1_link4_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0" material="" type="mesh" mesh="finger1_link4.STL" class="visual" />
+              <body name="finger1_tip_link" pos="-0.0011048 0.00023218 0.0283" quat="1.0 0.0 0.0 0.0">
+                <inertial pos="-0.00018237 -3.9481E-06 -0.0041777" quat="1.0 0.0 0.0 0.0" mass="0.004" diaginertia="1.8943e-07 1.8859e-07 1.6733e-07" />
+                <geom name="finger1_tip_link_collision" pos="0 0 0" quat="1.0 0.0 0.0 0.0" type="mesh" mesh="finger1_tip_link.STL" class="collision" />
+                <geom name="finger1_tip_link_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0" material="" type="mesh" mesh="finger1_tip_link.STL" class="visual" />
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+      <body name="finger2_link1" pos="-0.0058701 0.029434 0.091917" quat="0.9916887635847301 -0.058829485633527225 -0.029275462547150216 -0.11061390099139398">
+        <joint name="finger2_joint1" type="hinge" ref="0.0" class="motor" range="-0.32695 1.63595" axis="0 1 0" />
+        <site name="finger2_joint1_site" pos="0 0 0" quat="1 0 0 0" />
+        <inertial pos="-0.0013291 -3.2911E-08 0.00031987" quat="1.0 0.0 0.0 0.0" mass="0.0032" diaginertia="2.6373e-08 2.2948e-08 2.4484e-08" />
+        <geom name="finger2_link1_collision" pos="0 0 0" quat="1.0 0.0 0.0 0.0" type="mesh" mesh="finger2_link1.STL" class="collision" />
+        <geom name="finger2_link1_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0" material="" type="mesh" mesh="finger2_link1.STL" class="visual" />
+        <body name="finger2_link2" pos="0.0022 0 0.004" quat="1.0 0.0 0.0 0.0">
+          <joint name="finger2_joint2" type="hinge" ref="0.0" class="motor" range="-0.495 0.495" axis="-1 0 0" />
+          <site name="finger2_joint2_site" pos="0 0 0" quat="1 0 0 0" />
+          <inertial pos="-0.0061577 -4.1189E-07 0.020911" quat="1.0 0.0 0.0 0.0" mass="0.033" diaginertia="4.0385e-06 4.0532e-06 5.6602e-07" />
+          <geom name="finger2_link2_collision" pos="0 0 0" quat="1.0 0.0 0.0 0.0" type="mesh" mesh="finger2_link2.STL" class="collision" />
+          <geom name="finger2_link2_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0" material="" type="mesh" mesh="finger2_link2.STL" class="visual" />
+          <body name="finger2_link3" pos="-0.0047503 0 0.043618" quat="0.9999999909810835 0.0 0.0 -0.00013430499959623816">
+            <joint name="finger2_joint3" type="hinge" ref="0.0" class="motor" range="-0.4932 1.6272" axis="-0 1 -0" />
+            <site name="finger2_joint3_site" pos="0 0 0" quat="1 0 0 0" />
+            <inertial pos="-0.0011668 4.1873E-06 0.026893" quat="1.0 0.0 0.0 0.0" mass="0.0165" diaginertia="1.3423e-06 1.3154e-06 5.0263e-07" />
+            <geom name="finger2_link3_collision" pos="0 0 0" quat="1.0 0.0 0.0 0.0" type="mesh" mesh="finger2_link3.STL" class="collision" />
+            <geom name="finger2_link3_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0" material="" type="mesh" mesh="finger2_link3.STL" class="visual" />
+            <body name="finger2_link4" pos="0 0 0.0295" quat="1.0 0.0 0.0 0.0">
+              <joint name="finger2_joint4" type="hinge" ref="0.0" class="motor" range="-0.4932 1.6272" axis="-0 1 -0" />
+              <site name="finger2_joint4_site" pos="0 0 0" quat="1 0 0 0" />
+              <inertial pos="-0.00089438 1.7042E-05 0.0053518" quat="1.0 0.0 0.0 0.0" mass="0.014" diaginertia="1.3443e-07 9.4805e-08 1.0952e-07" />
+              <geom name="finger2_link4_collision" pos="0 0 0" quat="1.0 0.0 0.0 0.0" type="mesh" mesh="finger2_link4.STL" class="collision" />
+              <geom name="finger2_link4_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0" material="" type="mesh" mesh="finger2_link4.STL" class="visual" />
+              <body name="finger2_tip_link" pos="-0.00105 0 0.0274" quat="1.0 0.0 0.0 0.0">
+                <inertial pos="-0.00020111 3.8638E-06 -0.009311" quat="1.0 0.0 0.0 0.0" mass="0.004" diaginertia="2.2273e-07 2.2066e-07 1.6387e-07" />
+                <geom name="finger2_tip_link_collision" pos="0 0 0" quat="1.0 0.0 0.0 0.0" type="mesh" mesh="finger2_tip_link.STL" class="collision" />
+                <geom name="finger2_tip_link_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0" material="" type="mesh" mesh="finger2_tip_link.STL" class="visual" />
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+      <body name="finger3_link1" pos="-0.01046 0.0074615 0.089544" quat="0.9990481890991502 -1.2684824867247146e-05 -0.04361916183339305 0.00029054733912970787">
+        <joint name="finger3_joint1" type="hinge" ref="0.0" class="motor" range="-0.32695 1.63595" axis="0 1 0" />
+        <site name="finger3_joint1_site" pos="0 0 0" quat="1 0 0 0" />
+        <inertial pos="-0.0013291 3.4987E-09 0.00031994" quat="1.0 0.0 0.0 0.0" mass="0.0032" diaginertia="2.6373e-08 2.2948e-08 2.4484e-08" />
+        <geom name="finger3_link1_collision" pos="0 0 0" quat="1.0 0.0 0.0 0.0" type="mesh" mesh="finger3_link1.STL" class="collision" />
+        <geom name="finger3_link1_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0" material="" type="mesh" mesh="finger3_link1.STL" class="visual" />
+        <body name="finger3_link2" pos="0.0022 0 0.004" quat="1.0 0.0 0.0 0.0">
+          <joint name="finger3_joint2" type="hinge" ref="0.0" class="motor" range="-0.495 0.495" axis="-1 0 0" />
+          <site name="finger3_joint2_site" pos="0 0 0" quat="1 0 0 0" />
+          <inertial pos="-0.0061576 -4.1651E-07 0.020911" quat="1.0 0.0 0.0 0.0" mass="0.033" diaginertia="4.0385e-06 4.0532e-06 5.6602e-07" />
+          <geom name="finger3_link2_collision" pos="0 0 0" quat="1.0 0.0 0.0 0.0" type="mesh" mesh="finger3_link2.STL" class="collision" />
+          <geom name="finger3_link2_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0" material="" type="mesh" mesh="finger3_link2.STL" class="visual" />
+          <body name="finger3_link3" pos="-0.00475 0 0.043618" quat="0.9999999909810835 0.0 0.0 -0.00013430499959623816">
+            <joint name="finger3_joint3" type="hinge" ref="0.0" class="motor" range="-0.4932 1.6272" axis="-0 1 -0" />
+            <site name="finger3_joint3_site" pos="0 0 0" quat="1 0 0 0" />
+            <inertial pos="-0.0011214 4.331E-06 0.015763" quat="1.0 0.0 0.0 0.0" mass="0.0165" diaginertia="1.1195e-06 1.0947e-06 3.3876e-07" />
+            <geom name="finger3_link3_collision" pos="0 0 0" quat="1.0 0.0 0.0 0.0" type="mesh" mesh="finger3_link3.STL" class="collision" />
+            <geom name="finger3_link3_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0" material="" type="mesh" mesh="finger3_link3.STL" class="visual" />
+            <body name="finger3_link4" pos="0 0 0.0295" quat="1.0 0.0 0.0 0.0">
+              <joint name="finger3_joint4" type="hinge" ref="0.0" class="motor" range="-0.4932 1.6272" axis="-0 1 -0" />
+              <site name="finger3_joint4_site" pos="0 0 0" quat="1 0 0 0" />
+              <inertial pos="-0.00089436 1.7049E-05 0.0053518" quat="1.0 0.0 0.0 0.0" mass="0.014" diaginertia="1.3443e-07 9.4805e-08 1.0952e-07" />
+              <geom name="finger3_link4_collision" pos="0 0 0" quat="1.0 0.0 0.0 0.0" type="mesh" mesh="finger3_link4.STL" class="collision" />
+              <geom name="finger3_link4_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0" material="" type="mesh" mesh="finger3_link4.STL" class="visual" />
+              <body name="finger3_tip_link" pos="-0.0010491 0 0.0267" quat="1.0 0.0 0.0 0.0">
+                <inertial pos="-0.00020328 1.4971E-06 -0.008611" quat="1.0 0.0 0.0 0.0" mass="0.004" diaginertia="2.2273e-07 2.2066e-07 1.6387e-07" />
+                <geom name="finger3_tip_link_collision" pos="0 0 0" quat="1.0 0.0 0.0 0.0" type="mesh" mesh="finger3_tip_link.STL" class="collision" />
+                <geom name="finger3_tip_link_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0" material="" type="mesh" mesh="finger3_tip_link.STL" class="visual" />
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+      <body name="finger4_link1" pos="-0.0076649 -0.013712 0.084429" quat="0.9977885672599305 0.04610193435442398 -0.04058837269304493 0.025400210555943416">
+        <joint name="finger4_joint1" type="hinge" ref="0.0" class="motor" range="-0.32695 1.63595" axis="-0 1 -0" />
+        <site name="finger4_joint1_site" pos="0 0 0" quat="1 0 0 0" />
+        <inertial pos="-0.0013291 1.0048E-08 0.00031995" quat="1.0 0.0 0.0 0.0" mass="0.0032" diaginertia="2.6373e-08 2.2948e-08 2.4484e-08" />
+        <geom name="finger4_link1_collision" pos="0 0 0" quat="1.0 0.0 0.0 0.0" type="mesh" mesh="finger4_link1.STL" class="collision" />
+        <geom name="finger4_link1_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0" material="" type="mesh" mesh="finger4_link1.STL" class="visual" />
+        <body name="finger4_link2" pos="0.0022 0 0.004" quat="1.0 0.0 0.0 0.0">
+          <joint name="finger4_joint2" type="hinge" ref="0.0" class="motor" range="-0.495 0.495" axis="-1 0 0" />
+          <site name="finger4_joint2_site" pos="0 0 0" quat="1 0 0 0" />
+          <inertial pos="-0.0061576 -4.1601E-07 0.020911" quat="1.0 0.0 0.0 0.0" mass="0.033" diaginertia="4.0385e-06 4.0532e-06 5.6602e-07" />
+          <geom name="finger4_link2_collision" pos="0 0 0" quat="1.0 0.0 0.0 0.0" type="mesh" mesh="finger4_link2.STL" class="collision" />
+          <geom name="finger4_link2_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0" material="" type="mesh" mesh="finger4_link2.STL" class="visual" />
+          <body name="finger4_link3" pos="-0.00475 0 0.043618" quat="0.9999999909810835 0.0 0.0 -0.00013430499959623816">
+            <joint name="finger4_joint3" type="hinge" ref="0.0" class="motor" range="-0.4932 1.6272" axis="-0 1 -0" />
+            <site name="finger4_joint3_site" pos="0 0 0" quat="1 0 0 0" />
+            <inertial pos="-0.0011214 4.3494E-06 0.015763" quat="1.0 0.0 0.0 0.0" mass="0.0165" diaginertia="1.1195e-06 1.0947e-06 3.3876e-07" />
+            <geom name="finger4_link3_collision" pos="0 0 0" quat="1.0 0.0 0.0 0.0" type="mesh" mesh="finger4_link3.STL" class="collision" />
+            <geom name="finger4_link3_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0" material="" type="mesh" mesh="finger4_link3.STL" class="visual" />
+            <body name="finger4_link4" pos="0 0 0.0295" quat="1.0 0.0 0.0 0.0">
+              <joint name="finger4_joint4" type="hinge" ref="0.0" class="motor" range="-0.4932 1.6272" axis="-0 1 -0" />
+              <site name="finger4_joint4_site" pos="0 0 0" quat="1 0 0 0" />
+              <inertial pos="-0.00089436 1.7058E-05 0.0053518" quat="1.0 0.0 0.0 0.0" mass="0.014" diaginertia="1.3443e-07 9.4805e-08 1.0952e-07" />
+              <geom name="finger4_link4_collision" pos="0 0 0" quat="1.0 0.0 0.0 0.0" type="mesh" mesh="finger4_link4.STL" class="collision" />
+              <geom name="finger4_link4_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0" material="" type="mesh" mesh="finger4_link4.STL" class="visual" />
+              <body name="finger4_tip_link" pos="-0.0010528 0 0.0267" quat="1.0 0.0 0.0 0.0">
+                <inertial pos="-0.00020322 1.528E-06 -0.0086106" quat="1.0 0.0 0.0 0.0" mass="0.004" diaginertia="2.2277e-07 2.2068e-07 1.6386e-07" />
+                <geom name="finger4_tip_link_collision" pos="0 0 0" quat="1.0 0.0 0.0 0.0" type="mesh" mesh="finger4_tip_link.STL" class="collision" />
+                <geom name="finger4_tip_link_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0" material="" type="mesh" mesh="finger4_tip_link.STL" class="visual" />
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+      <body name="finger5_link1" pos="-0.0022687 -0.034001 0.074281" quat="0.9908695933241349 0.09931544482764694 -0.03832562822691053 0.08273474279504754">
+        <joint name="finger5_joint1" type="hinge" ref="0.0" class="motor" range="-0.32695 1.63595" axis="0 1 0" />
+        <site name="finger5_joint1_site" pos="0 0 0" quat="1 0 0 0" />
+        <inertial pos="-0.0013291 1.7235E-08 0.00031997" quat="1.0 0.0 0.0 0.0" mass="0.0032" diaginertia="2.6373e-08 2.2948e-08 2.4484e-08" />
+        <geom name="finger5_link1_collision" pos="0 0 0" quat="1.0 0.0 0.0 0.0" type="mesh" mesh="finger5_link1.STL" class="collision" />
+        <geom name="finger5_link1_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0" material="" type="mesh" mesh="finger5_link1.STL" class="visual" />
+        <body name="finger5_link2" pos="0.0022 0 0.004" quat="1.0 0.0 0.0 0.0">
+          <joint name="finger5_joint2" type="hinge" ref="0.0" class="motor" range="-0.495 0.495" axis="-1 0 0" />
+          <site name="finger5_joint2_site" pos="0 0 0" quat="1 0 0 0" />
+          <inertial pos="-0.0061576 -4.1475E-07 0.020911" quat="1.0 0.0 0.0 0.0" mass="0.033" diaginertia="4.0385e-06 4.0532e-06 5.6602e-07" />
+          <geom name="finger5_link2_collision" pos="0 0 0" quat="1.0 0.0 0.0 0.0" type="mesh" mesh="finger5_link2.STL" class="collision" />
+          <geom name="finger5_link2_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0" material="" type="mesh" mesh="finger5_link2.STL" class="visual" />
+          <body name="finger5_link3" pos="-0.00475 0 0.043618" quat="0.9999999909810835 0.0 0.0 -0.00013430499959623816">
+            <joint name="finger5_joint3" type="hinge" ref="0.0" class="motor" range="-0.4932 1.6272" axis="-0 1 -0" />
+            <site name="finger5_joint3_site" pos="0 0 0" quat="1 0 0 0" />
+            <inertial pos="-0.0011214 4.3703E-06 0.015763" quat="1.0 0.0 0.0 0.0" mass="0.0165" diaginertia="1.1195e-06 1.0947e-06 3.3876e-07" />
+            <geom name="finger5_link3_collision" pos="0 0 0" quat="1.0 0.0 0.0 0.0" type="mesh" mesh="finger5_link3.STL" class="collision" />
+            <geom name="finger5_link3_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0" material="" type="mesh" mesh="finger5_link3.STL" class="visual" />
+            <body name="finger5_link4" pos="0 0 0.0295" quat="1.0 0.0 0.0 0.0">
+              <joint name="finger5_joint4" type="hinge" ref="0.0" class="motor" range="-0.4932 1.6272" axis="-0 1 -0" />
+              <site name="finger5_joint4_site" pos="0 0 0" quat="1 0 0 0" />
+              <inertial pos="-0.00089437 1.7063E-05 0.0053518" quat="1.0 0.0 0.0 0.0" mass="0.014" diaginertia="1.3443e-07 9.4805e-08 1.0952e-07" />
+              <geom name="finger5_link4_collision" pos="0 0 0" quat="1.0 0.0 0.0 0.0" type="mesh" mesh="finger5_link4.STL" class="collision" />
+              <geom name="finger5_link4_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0" material="" type="mesh" mesh="finger5_link4.STL" class="visual" />
+              <body name="finger5_tip_link" pos="-0.0010446 1.1308E-05 0.0267" quat="1.0 0.0 0.0 0.0">
+                <inertial pos="-0.00020332 1.4872E-06 -0.0086111" quat="1.0 0.0 0.0 0.0" mass="0.004" diaginertia="2.2273e-07 2.2066e-07 1.6386e-07" />
+                <geom name="finger5_tip_link_collision" pos="0 0 0" quat="1.0 0.0 0.0 0.0" type="mesh" mesh="finger5_tip_link.STL" class="collision" />
+                <geom name="finger5_tip_link_visual" pos="0 0 0" quat="1.0 0.0 0.0 0.0" material="" type="mesh" mesh="finger5_tip_link.STL" class="visual" />
+              </body>
+            </body>
+          </body>
+        </body>
+      </body>
+      <site name="palm_link_site" pos="0 0 0" quat="1 0 0 0" />
+      <camera name="front_camera" mode="track" fovy="90.0" quat="4.329780281177467e-17 4.329780281177466e-17 0.7071067811865475 0.7071067811865476" pos="0.0 2.0 0.5" />
+      <camera name="side_camera" mode="track" fovy="90.0" quat="-0.5 -0.4999999999999999 0.5 0.5000000000000001" pos="-2.0 0.0 0.5" />
+    </body>
+  </worldbody>
+
+  <actuator>
+    <motor name="finger1_joint1_ctrl" joint="finger1_joint1" class="motor" />
+    <motor name="finger1_joint2_ctrl" joint="finger1_joint2" class="motor" />
+    <motor name="finger1_joint3_ctrl" joint="finger1_joint3" class="motor" />
+    <motor name="finger1_joint4_ctrl" joint="finger1_joint4" class="motor" />
+    <motor name="finger2_joint1_ctrl" joint="finger2_joint1" class="motor" />
+    <motor name="finger2_joint2_ctrl" joint="finger2_joint2" class="motor" />
+    <motor name="finger2_joint3_ctrl" joint="finger2_joint3" class="motor" />
+    <motor name="finger2_joint4_ctrl" joint="finger2_joint4" class="motor" />
+    <motor name="finger3_joint1_ctrl" joint="finger3_joint1" class="motor" />
+    <motor name="finger3_joint2_ctrl" joint="finger3_joint2" class="motor" />
+    <motor name="finger3_joint3_ctrl" joint="finger3_joint3" class="motor" />
+    <motor name="finger3_joint4_ctrl" joint="finger3_joint4" class="motor" />
+    <motor name="finger4_joint1_ctrl" joint="finger4_joint1" class="motor" />
+    <motor name="finger4_joint2_ctrl" joint="finger4_joint2" class="motor" />
+    <motor name="finger4_joint3_ctrl" joint="finger4_joint3" class="motor" />
+    <motor name="finger4_joint4_ctrl" joint="finger4_joint4" class="motor" />
+    <motor name="finger5_joint1_ctrl" joint="finger5_joint1" class="motor" />
+    <motor name="finger5_joint2_ctrl" joint="finger5_joint2" class="motor" />
+    <motor name="finger5_joint3_ctrl" joint="finger5_joint3" class="motor" />
+    <motor name="finger5_joint4_ctrl" joint="finger5_joint4" class="motor" />
+  </actuator>
+
+  <contact>
+    <exclude body1="palm_link" body2="finger1_link1" />
+    <exclude body1="finger1_link1" body2="finger1_link2" />
+    <exclude body1="finger1_link2" body2="finger1_link3" />
+    <exclude body1="finger1_link3" body2="finger1_link4" />
+    <exclude body1="finger1_link4" body2="finger1_tip_link" />
+    <exclude body1="palm_link" body2="finger2_link1" />
+    <exclude body1="finger2_link1" body2="finger2_link2" />
+    <exclude body1="finger2_link2" body2="finger2_link3" />
+    <exclude body1="finger2_link3" body2="finger2_link4" />
+    <exclude body1="finger2_link4" body2="finger2_tip_link" />
+    <exclude body1="palm_link" body2="finger3_link1" />
+    <exclude body1="finger3_link1" body2="finger3_link2" />
+    <exclude body1="finger3_link2" body2="finger3_link3" />
+    <exclude body1="finger3_link3" body2="finger3_link4" />
+    <exclude body1="finger3_link4" body2="finger3_tip_link" />
+    <exclude body1="palm_link" body2="finger4_link1" />
+    <exclude body1="finger4_link1" body2="finger4_link2" />
+    <exclude body1="finger4_link2" body2="finger4_link3" />
+    <exclude body1="finger4_link3" body2="finger4_link4" />
+    <exclude body1="finger4_link4" body2="finger4_tip_link" />
+    <exclude body1="palm_link" body2="finger5_link1" />
+    <exclude body1="finger5_link1" body2="finger5_link2" />
+    <exclude body1="finger5_link2" body2="finger5_link3" />
+    <exclude body1="finger5_link3" body2="finger5_link4" />
+    <exclude body1="finger5_link4" body2="finger5_tip_link" />
+  </contact>
+
+  <sensor>
+    <framepos name="finger1_joint1_site_pos" objtype="site" objname="finger1_joint1_site" />
+    <framequat name="finger1_joint1_site_quat" objtype="site" objname="finger1_joint1_site" />
+    <framelinvel name="finger1_joint1_site_linvel" objtype="site" objname="finger1_joint1_site" />
+    <frameangvel name="finger1_joint1_site_angvel" objtype="site" objname="finger1_joint1_site" />
+    <velocimeter name="finger1_joint1_site_vel" site="finger1_joint1_site" />
+  </sensor>
+</mujoco>

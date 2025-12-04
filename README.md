@@ -102,7 +102,7 @@ graph TD;
 
 **5. 将输出转换为MUJOCO 3D 窗口中手部模型的运动**
 
-由于智元官方没有给出omnihand的.xml文件，使用开源的方法[urdf2mjcf](https://github.com/kscalelabs/urdf2mjcf)将.urdf转换为.xml并放入运行目录下
+由于智元官方没有给出omnihand的.xml文件，使用开源的方法[urdf2mjcf](https://github.com/kscalelabs/urdf2mjcf)和[教程](https://blog.csdn.net/weixin_44334573/article/details/146248011)将.urdf转换为.xml并放入运行目录下
 ```bash
 python retargeting_mujoco_ros2.py \
     --robot_name omni \

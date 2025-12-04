@@ -58,6 +58,7 @@ class Optimizer:
             )
         self.opt.set_lower_bounds((joint_limits[:, 0] - epsilon).tolist())
         self.opt.set_upper_bounds((joint_limits[:, 1] + epsilon).tolist())
+        self.joint_limits = joint_limits.copy()
 
     def get_link_indices(self, target_link_names):
         return [self.robot.get_link_index(link_name) for link_name in target_link_names]
@@ -404,6 +405,27 @@ class DexPilotOptimizer(Optimizer):
             self.projected_dist,
         ) = self.set_dexpilot_cache(self.num_fingers, eta1, eta2)
 
+        # === ➕ 新增：pinky 正则相关缓存 ===
+        # 找出 optimizer 变量 x 里哪些 index 对应 pinky 关节
+        robot_joint_names = self.robot.dof_joint_names
+        pinky_target_indices = []
+        for local_idx, pin_idx in enumerate(self.idx_pin2target):
+            name = robot_joint_names[pin_idx].lower()
+            if "pinky" in name:
+                pinky_target_indices.append(local_idx)
+
+        self.pinky_target_indices = np.array(pinky_target_indices, dtype=int)
+
+        # 温和一点的正则权重（可以之后慢慢调大）
+        self.pinky_reg_weight = 0.15  # stage 1: very gentle
+
+        # style pose：先默认拉向 0（伸直），之后可以单独给每个关节一个好看角度
+        self.pinky_style = np.zeros(self.opt_dof, dtype=np.float32)
+        # 如果你想手动指定，比如：
+        # self.pinky_style[...] 对某些 index 设成 0.3 / 0.5 等可以之后再改
+        print("[DexPilotOptimizer] pinky_reg_weight =", self.pinky_reg_weight)
+        print("[DexPilotOptimizer] pinky_target_indices =", self.pinky_target_indices)  
+
     @staticmethod
     def generate_link_indices(num_fingers):
         """
@@ -540,6 +562,20 @@ class DexPilotOptimizer(Optimizer):
             huber_distance = huber_distance.sum()
             result = huber_distance.cpu().detach().item()
 
+            # ===== ➕ 新增：pinky 正则项到标量 loss =====
+            if (
+                self.pinky_reg_weight > 0.0
+                and self.pinky_target_indices.size > 0
+            ):
+                idx = self.pinky_target_indices
+                q_pinky = x[idx]
+                style_pinky = self.pinky_style[idx]
+                # 温和一点的 L2 正则，bias pinky 靠近 style（默认 0）
+                pinky_reg = self.pinky_reg_weight * np.sum(
+                    (q_pinky - style_pinky) ** 2
+                )
+                result += float(pinky_reg)
+
             if grad.size > 0:
                 jacobians = []
                 for i, index in enumerate(self.computed_link_indices):
@@ -569,6 +605,18 @@ class DexPilotOptimizer(Optimizer):
                 # which is equivalent to fully opened the hand
                 # In our implementation, we regularize the joint angles to the previous joint angles
                 grad_qpos += 2 * self.norm_delta * (x - last_qpos)
+
+                # ===== ➕ 新增：pinky 正则对梯度的贡献 =====
+                if (
+                    self.pinky_reg_weight > 0.0
+                    and self.pinky_target_indices.size > 0
+                ):
+                    idx = self.pinky_target_indices
+                    grad_qpos[idx] += (
+                        2.0
+                        * self.pinky_reg_weight
+                        * (x[idx] - self.pinky_style[idx])
+                    )
 
                 grad[:] = grad_qpos[:]
 
