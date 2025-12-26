@@ -2,6 +2,7 @@ import multiprocessing
 import time
 from pathlib import Path
 from queue import Empty
+from collections import deque
 from typing import Optional
 
 import cv2
@@ -36,16 +37,18 @@ OPERATOR2MANO_RIGHT = np.array(
 
 # 创建ROS2节点和发布者
 class JointStatePublisher(Node):
-    def __init__(self, robot_name):
+    def __init__(self, robot_name: str, topic_name: str):
         super().__init__('retargeting_joint_publisher')
         self.publisher_ = self.create_publisher(
-            JointState, 
-            '/joint_commands', 
+            JointState,
+            topic_name,
             10
         )
         self.joint_names = []  # 将在后续填充
         self.robot_name = robot_name
-        self.get_logger().info(f"JointState publisher created for {robot_name}")
+        self.get_logger().info(
+            f"JointState publisher created for {robot_name} on {topic_name}"
+        )
         
     def publish_joints(self, positions):
         msg = JointState()
@@ -127,7 +130,26 @@ class ROS2LandmarkSubscriber(Node):
         frame = np.stack([x, normal, z], axis=1)
         return frame
 
-def start_retargeting(queue: multiprocessing.Queue, robot_dir: str, config_path: str):
+def _gaussian_weights(window_size: int, sigma: float) -> np.ndarray:
+    if window_size <= 1:
+        return np.ones(1)
+    half = window_size // 2
+    x = np.arange(-half, half + 1)
+    weights = np.exp(-(x ** 2) / (2 * sigma ** 2))
+    return weights / np.sum(weights)
+
+def start_retargeting(
+    queue: multiprocessing.Queue,
+    robot_dir: str,
+    config_path: str,
+    publish_topic: str,
+    publish_rate_hz: float,
+    filter_type: str,
+    filter_window: int,
+    filter_sigma: float,
+    ema_alpha: float,
+    max_vel_rad: float,
+):
     rclpy.init()
     RetargetingConfig.set_default_urdf_dir(str(robot_dir))
     logger.info(f"Start retargeting with config {config_path}")
@@ -143,7 +165,7 @@ def start_retargeting(queue: multiprocessing.Queue, robot_dir: str, config_path:
     else:
         filepath = str(filepath)
     robot = loader.load(filepath)
-    joint_publisher_node = JointStatePublisher(robot_name)
+    joint_publisher_node = JointStatePublisher(robot_name, publish_topic)
 
     # Different robot loader may have different orders for joints
     sapien_joint_names = [joint.get_name() for joint in robot.get_active_joints()]
@@ -156,32 +178,98 @@ def start_retargeting(queue: multiprocessing.Queue, robot_dir: str, config_path:
     dtype=int,
     )
 
+    history = deque(maxlen=max(1, filter_window))
+    gaussian_weights = None
+    if filter_type == "gaussian":
+        window_size = max(1, filter_window)
+        if window_size % 2 == 0:
+            window_size += 1
+        history = deque(maxlen=window_size)
+        gaussian_weights = _gaussian_weights(window_size, filter_sigma)
+
+    last_qpos = None
+    last_time = None
+
 # -------------------------------------------------------------------
+    prev_qpos = None
+    prev_time = None
+    curr_qpos = None
+    curr_time = None
+    target_dt = 1.0 / max(1e-3, publish_rate_hz)
+    last_pub = time.time()
+
     while True:
+        # Consume latest joint data if available.
         try:
-            # 从队列获取关节数据
-            joint_pos = queue.get(timeout=1.0)
-            
-            # 处理重定向
-            retargeting_type = retargeting.optimizer.retargeting_type
-            indices = retargeting.optimizer.target_link_human_indices
-            
-            if retargeting_type == "POSITION":
-                ref_value = joint_pos[indices, :]
-            else:
-                origin_indices = indices[0, :]
-                task_indices = indices[1, :]
-                ref_value = joint_pos[task_indices, :] - joint_pos[origin_indices, :]
-                qpos = retargeting.retarget(ref_value)  # full DOF
-                
-                qpos_publish = qpos[idx_publish]        # 只取 10 个
+            while True:
+                joint_pos = queue.get_nowait()
+                retargeting_type = retargeting.optimizer.retargeting_type
+                indices = retargeting.optimizer.target_link_human_indices
+
+                if retargeting_type == "POSITION":
+                    ref_value = joint_pos[indices, :]
+                else:
+                    origin_indices = indices[0, :]
+                    task_indices = indices[1, :]
+                    ref_value = joint_pos[task_indices, :] - joint_pos[origin_indices, :]
+                    qpos = retargeting.retarget(ref_value)  # full DOF
+                    qpos_publish = qpos[idx_publish]        # 只取 10 个
+
+                    prev_qpos, prev_time = curr_qpos, curr_time
+                    curr_qpos = qpos_publish
+                    curr_time = time.time()
+        except Empty:
+            pass
+
+        now = time.time()
+        if now - last_pub >= target_dt:
+            last_pub = now
+
+            if curr_qpos is not None:
+                if (
+                    prev_qpos is not None
+                    and prev_time is not None
+                    and curr_time is not None
+                    and curr_time > prev_time
+                ):
+                    alpha = (now - prev_time) / (curr_time - prev_time)
+                    alpha = float(np.clip(alpha, 0.0, 1.0))
+                    qpos_publish = prev_qpos + alpha * (curr_qpos - prev_qpos)
+                else:
+                    qpos_publish = curr_qpos
+
+                if filter_type == "ema":
+                    if len(history) == 0:
+                        history.append(qpos_publish)
+                    else:
+                        last = history[-1]
+                        smoothed = ema_alpha * qpos_publish + (1 - ema_alpha) * last
+                        history.append(smoothed)
+                    qpos_publish = history[-1]
+                elif filter_type == "gaussian":
+                    history.append(qpos_publish)
+                    if len(history) == history.maxlen:
+                        stacked = np.stack(history, axis=0)
+                        qpos_publish = np.sum(
+                            stacked * gaussian_weights[:, None], axis=0
+                        )
+
+                if max_vel_rad > 0:
+                    if last_time is None:
+                        last_time = now
+                        last_qpos = qpos_publish.copy()
+                    else:
+                        dt = max(1e-6, now - last_time)
+                        max_delta = max_vel_rad * dt
+                        delta = qpos_publish - last_qpos
+                        delta = np.clip(delta, -max_delta, max_delta)
+                        qpos_publish = last_qpos + delta
+                        last_qpos = qpos_publish.copy()
+                        last_time = now
 
                 joint_publisher_node.joint_names = list(actuated_joint_names)
-
                 joint_publisher_node.publish_joints(qpos_publish)
 
-        except Empty:
-            logger.warning("No hand data received in 1 second. Applying default pose.")
         # 检查退出条件
         if cv2.waitKey(1) & 0xFF == ord("q"):
             break
@@ -210,7 +298,14 @@ def main(
     robot_name: RobotName,
     retargeting_type: RetargetingType,
     hand_type: HandType,
-    ros_topic: str = "/vrpn/hand_kp" # 实际topic
+    ros_topic: str = "/vrpn/hand_kp",  # 实际topic
+    publish_topic: str = "/joint_commands",
+    publish_rate_hz: float = 60.0,
+    filter_type: str = "ema",
+    filter_window: int = 7,
+    filter_sigma: float = 1.5,
+    ema_alpha: float = 0.1,
+    max_vel_rad: float = 1.0,
 ):
     """
     Detects the human hand pose from a video and translates the human pose trajectory into a robot pose trajectory.
@@ -222,6 +317,13 @@ def main(
             Please note that retargeting is specific to the same type of hand: a left robot hand can only be retargeted
             to another left robot hand, and the same applies for the right hand.
         ros_topic: the topic name to get joints info
+        publish_topic: the topic name to publish JointState
+        publish_rate_hz: publish rate for command output
+        filter_type: "none", "ema", or "gaussian"
+        filter_window: window size for gaussian filter (odd number recommended)
+        filter_sigma: sigma for gaussian filter
+        ema_alpha: smoothing factor for EMA, larger is less smooth
+        max_vel_rad: max joint velocity (rad/s), <= 0 disables the limiter
     """
     config_path = get_default_config_path(robot_name, retargeting_type, hand_type)
     robot_dir = (
@@ -232,7 +334,19 @@ def main(
         target=produce_frame, args=(queue, ros_topic)
     )
     consumer_process = multiprocessing.Process(
-        target=start_retargeting, args=(queue, str(robot_dir), str(config_path))
+        target=start_retargeting,
+        args=(
+            queue,
+            str(robot_dir),
+            str(config_path),
+            publish_topic,
+            publish_rate_hz,
+            filter_type,
+            filter_window,
+            filter_sigma,
+            ema_alpha,
+            max_vel_rad,
+        ),
     )
 
     producer_process.start()

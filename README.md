@@ -43,11 +43,16 @@ pip install -e .
 ```
 **2. 启动节点输出**
 ```bash
-  python retargeting_ros2.py \
-  --robot_name omni \
+python retargeting_ros2.py \
+  --robot_name wuji \
   --retargeting_type dexpilot \
-  --hand_type right \
-  --ros_topic /hotrack/landmarks
+  --hand-type right \
+  --ros-topic /hotrack/landmarks \
+  --publish-topic /hand_0/joint_commands \
+  --publish-rate-hz 80 \
+  --max-vel-rad 1.0 \
+  --filter-type ema \
+  --ema-alpha 0.1
 ```
 此处ros_topic的名字取决于发布设备
 
@@ -101,13 +106,16 @@ graph TD
 
 **5. 将输出转换为MUJOCO 3D 窗口中手部模型的运动**
 
-由于智元官方没有给出omnihand的.xml文件，使用开源的方法[urdf2mjcf](https://github.com/kscalelabs/urdf2mjcf)和[教程](https://blog.csdn.net/weixin_44334573/article/details/146248011)将.urdf转换为.xml并放入运行目录下
+由于智元官方没有给出omnihand的.xml文件，使用开源的方法[urdf2mjcf](https://github.com/kscalelabs/urdf2mjcf)将.urdf转换为.xml并放入运行目录下
 ```bash
 python retargeting_mujoco_ros2.py \
-    --robot_name omni \
-    --retargeting_type dexpilot \
-    --hand_type right \
-    --mjcf_path ./omnihand_right.xml \
-    --ros_topic /hotrack/landmarks
+  --robot_name wuji \
+  --retargeting_type dexpilot \
+  --hand_type right \
+  --mjcf-path ./wujihand_right.xml \
+  --ros_topic /hotrack/landmarks \
+  --filter-type gaussian \
+  --filter-window 5 \
+  --filter-sigma 1.0
 ```
 此处ros_topic的名字取决于发布设备

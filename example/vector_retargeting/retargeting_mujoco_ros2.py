@@ -2,6 +2,7 @@ import multiprocessing
 import time
 from pathlib import Path
 from queue import Empty
+from collections import deque
 from typing import Optional, Dict
 
 import numpy as np
@@ -31,6 +32,14 @@ OPERATOR2MANO_RIGHT = np.array(
         [0, 1, 0],
     ]
 )
+
+def _gaussian_weights(window_size: int, sigma: float) -> np.ndarray:
+    if window_size <= 1:
+        return np.ones(1)
+    half = window_size // 2
+    x = np.arange(-half, half + 1)
+    weights = np.exp(-(x ** 2) / (2 * sigma ** 2))
+    return weights / np.sum(weights)
 
 
 class ROS2LandmarkSubscriber(Node):
@@ -122,6 +131,10 @@ def start_retargeting_mujoco(
     robot_dir: str,
     config_path: str,
     mjcf_path: str,
+    filter_type: str,
+    filter_window: int,
+    filter_sigma: float,
+    ema_alpha: float,
 ):
     """
     消费 queue 里的 21x3 关键点：
@@ -154,6 +167,15 @@ def start_retargeting_mujoco(
         )
 
     mujoco.mj_forward(mj_model, mj_data)
+
+    history = deque(maxlen=max(1, filter_window))
+    gaussian_weights = None
+    if filter_type == "gaussian":
+        window_size = max(1, filter_window)
+        if window_size % 2 == 0:
+            window_size += 1
+        history = deque(maxlen=window_size)
+        gaussian_weights = _gaussian_weights(window_size, filter_sigma)
 
     # --- 主循环：MuJoCo viewer + retargeting ---
     try:
@@ -194,6 +216,21 @@ def start_retargeting_mujoco(
                         )
 
                     qpos = retargeting.retarget(ref_value).astype(np.float64)
+                    if filter_type == "ema":
+                        if len(history) == 0:
+                            history.append(qpos)
+                        else:
+                            last = history[-1]
+                            smoothed = ema_alpha * qpos + (1 - ema_alpha) * last
+                            history.append(smoothed)
+                        qpos = history[-1]
+                    elif filter_type == "gaussian":
+                        history.append(qpos)
+                        if len(history) == history.maxlen:
+                            stacked = np.stack(history, axis=0)
+                            qpos = np.sum(
+                                stacked * gaussian_weights[:, None], axis=0
+                            )
 
                     # 写回 MuJoCo 的 qpos（这里加拇指 offset）
                     for i, name in enumerate(dof_names):
@@ -240,12 +277,17 @@ def main(
     hand_type: HandType,
     mjcf_path: str,
     ros_topic: str = "/vrpn/hand_kp",
+    filter_type: str = "none",
+    filter_window: int = 5,
+    filter_sigma: float = 1.0,
+    ema_alpha: float = 0.2,
 ):
     """
     retargeting_ros2 的 MuJoCo 版本：
     - 左进：ROS2 PoseArray (21x3 手部关键点)
     - 中间：DexPilot retargeting
     - 右出：MuJoCo qpos
+    - filter_type: "none", "ema", or "gaussian"
     """
     config_path = get_default_config_path(robot_name, retargeting_type, hand_type)
     robot_dir = (
@@ -260,7 +302,16 @@ def main(
     )
     consumer_process = multiprocessing.Process(
         target=start_retargeting_mujoco,
-        args=(queue, str(robot_dir), str(config_path), mjcf_path),
+        args=(
+            queue,
+            str(robot_dir),
+            str(config_path),
+            mjcf_path,
+            filter_type,
+            filter_window,
+            filter_sigma,
+            ema_alpha,
+        ),
     )
 
     producer_process.start()

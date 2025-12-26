@@ -165,7 +165,7 @@ class RetargetingConfig:
         return config
 
     def build(self) -> SeqRetargeting:
-        from dex_retargeting.optimizer import (
+        from dex_retargeting.optimizer_omni import (
             VectorOptimizer,
             PositionOptimizer,
             DexPilotOptimizer,
