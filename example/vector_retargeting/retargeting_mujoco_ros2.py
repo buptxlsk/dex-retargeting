@@ -135,6 +135,16 @@ def start_retargeting_mujoco(
     filter_window: int,
     filter_sigma: float,
     ema_alpha: float,
+    anti_flip_enable: bool,
+    anti_flip_min_rad: float,
+    anti_flip_blend: float,
+    anti_flip_strict: bool,
+    anti_flip_use_urdf_limits: bool,
+    anti_flip_lower_offset_rad: float,
+    anti_flip_hard_limit: bool,
+    anti_flip_extra_joint4_fingers: str,
+    anti_flip_fingers: str,
+    anti_flip_seed_straight: bool,
 ):
     """
     消费 queue 里的 21x3 关键点：
@@ -152,6 +162,8 @@ def start_retargeting_mujoco(
     # retargeting 侧 DOF 名称
     dof_names = list(retargeting.optimizer.robot.dof_joint_names)
     logger.info(f"Retargeting DOF joints: {dof_names}")
+    target_joint_names = list(retargeting.optimizer.target_joint_names)
+    idx_target_in_qpos = [dof_names.index(name) for name in target_joint_names]
 
     # --- init MuJoCo ---
     mj_model = mujoco.MjModel.from_xml_path(mjcf_path)
@@ -177,6 +189,66 @@ def start_retargeting_mujoco(
         history = deque(maxlen=window_size)
         gaussian_weights = _gaussian_weights(window_size, filter_sigma)
 
+    finger_name_groups = {}
+    if anti_flip_fingers:
+        try:
+            finger_ids = {
+                int(x.strip())
+                for x in anti_flip_fingers.split(",")
+                if x.strip()
+            }
+        except ValueError:
+            finger_ids = set()
+        for finger_id in finger_ids:
+            target_name = f"finger{finger_id}_joint3"
+            indices = [
+                i
+                for i, name in enumerate(target_joint_names)
+                if name == target_name
+            ]
+            if indices:
+                finger_name_groups[finger_id] = indices
+
+    if anti_flip_extra_joint4_fingers:
+        try:
+            finger_ids = {
+                int(x.strip())
+                for x in anti_flip_extra_joint4_fingers.split(",")
+                if x.strip()
+            }
+        except ValueError:
+            finger_ids = set()
+        for finger_id in finger_ids:
+            target_name = f"finger{finger_id}_joint4"
+            indices = [
+                i
+                for i, name in enumerate(target_joint_names)
+                if name == target_name
+            ]
+            if indices:
+                finger_name_groups.setdefault(finger_id, []).extend(indices)
+
+    joint_lower_bounds = {}
+    if anti_flip_use_urdf_limits:
+        for i, name in enumerate(target_joint_names):
+            lower = retargeting.joint_limits[i, 0]
+            joint_lower_bounds[name] = lower + anti_flip_lower_offset_rad
+
+    if anti_flip_hard_limit and finger_name_groups:
+        new_limits = retargeting.joint_limits.copy()
+        for indices in finger_name_groups.values():
+            for idx in indices:
+                new_limits[idx, 0] = new_limits[idx, 0] + anti_flip_lower_offset_rad
+        retargeting.joint_limits = new_limits
+        retargeting.optimizer.set_joint_limit(new_limits)
+        retargeting.last_qpos = np.clip(
+            retargeting.last_qpos, new_limits[:, 0], new_limits[:, 1]
+        )
+
+    if anti_flip_seed_straight:
+        last_good_qpos = np.zeros(len(target_joint_names), dtype=np.float32)
+    else:
+        last_good_qpos = None
     # --- 主循环：MuJoCo viewer + retargeting ---
     try:
         with viewer.launch_passive(mj_model, mj_data) as v:
@@ -232,6 +304,40 @@ def start_retargeting_mujoco(
                                 stacked * gaussian_weights[:, None], axis=0
                             )
 
+                    if anti_flip_enable and finger_name_groups:
+                        qpos_target = qpos[idx_target_in_qpos].copy()
+                        if last_good_qpos is None:
+                            last_good_qpos = qpos_target.copy()
+                        abnormal_indices = []
+                        for indices in finger_name_groups.values():
+                            for idx in indices:
+                                name = target_joint_names[idx]
+                                lower = joint_lower_bounds.get(name, anti_flip_min_rad)
+                                if qpos_target[idx] < lower:
+                                    abnormal_indices.append(idx)
+                        if abnormal_indices:
+                            qpos_corrected = qpos_target.copy()
+                            qpos_corrected[abnormal_indices] = (
+                                (1.0 - anti_flip_blend)
+                                * qpos_corrected[abnormal_indices]
+                                + anti_flip_blend
+                                * last_good_qpos[abnormal_indices]
+                            )
+                            if anti_flip_strict:
+                                for idx in abnormal_indices:
+                                    name = target_joint_names[idx]
+                                    lower = joint_lower_bounds.get(
+                                        name, anti_flip_min_rad
+                                    )
+                                    qpos_corrected[idx] = max(
+                                        qpos_corrected[idx], lower
+                                    )
+                            qpos_target = qpos_corrected
+                            qpos[idx_target_in_qpos] = qpos_target
+                            retargeting.last_qpos = qpos_target.astype(np.float32)
+                        else:
+                            last_good_qpos = qpos_target.copy()
+
                     # 写回 MuJoCo 的 qpos（这里加拇指 offset）
                     for i, name in enumerate(dof_names):
                         if name not in name_to_qpos:
@@ -281,6 +387,16 @@ def main(
     filter_window: int = 5,
     filter_sigma: float = 1.0,
     ema_alpha: float = 0.2,
+    anti_flip_enable: bool = True,
+    anti_flip_min_rad: float = -0.2,
+    anti_flip_blend: float = 0.7,
+    anti_flip_strict: bool = True,
+    anti_flip_use_urdf_limits: bool = True,
+    anti_flip_lower_offset_rad: float = 0.3,
+    anti_flip_hard_limit: bool = True,
+    anti_flip_extra_joint4_fingers: str = "1,5",
+    anti_flip_fingers: str = "1,3,4,5",
+    anti_flip_seed_straight: bool = True,
 ):
     """
     retargeting_ros2 的 MuJoCo 版本：
@@ -288,6 +404,7 @@ def main(
     - 中间：DexPilot retargeting
     - 右出：MuJoCo qpos
     - filter_type: "none", "ema", or "gaussian"
+    - anti_flip_*: anti-hyperextension correction (same as retargeting_ros2)
     """
     config_path = get_default_config_path(robot_name, retargeting_type, hand_type)
     robot_dir = (
@@ -311,6 +428,16 @@ def main(
             filter_window,
             filter_sigma,
             ema_alpha,
+            anti_flip_enable,
+            anti_flip_min_rad,
+            anti_flip_blend,
+            anti_flip_strict,
+            anti_flip_use_urdf_limits,
+            anti_flip_lower_offset_rad,
+            anti_flip_hard_limit,
+            anti_flip_extra_joint4_fingers,
+            anti_flip_fingers,
+            anti_flip_seed_straight,
         ),
     )
 

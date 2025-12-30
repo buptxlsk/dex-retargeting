@@ -119,3 +119,28 @@ python retargeting_mujoco_ros2.py \
   --filter-sigma 1.0
 ```
 此处ros_topic的名字取决于发布设备
+
+# 基于 wujihand 实际表现的改动
+
+1. DexPilot 原本通过“投影/逃逸”的硬阈值切换参考向量与权重；改成连续 alpha 线性过渡，让 loss 与梯度连续，减少抖动和突然跳变。
+
+2. scaling_factor 扩展为 per‑finger，让不同手指可以使用不同尺度：腕→指尖向量用本指缩放，指‑指向量用两指缩放的平均值，兼顾相对比例。但是在实际使用中，各个手指的求解互相影响，需要仔细调节
+
+3. 移除 pinky 正则，避免对当前手型造成额外偏置。
+
+4. 新增一组参数（anti_flip_*），用于识别并纠正拇指/中指/无名指/小指的反弯，反弯时先按 anti_flip_blend 回退到“最近健康姿态”，anti_flip_strict 进一步做硬夹紧，保证不低于阈值。
+
+5. 使用 URDF 的 joint lower 作为基准阈值，并通过 anti_flip_lower_offset_rad 往上抬。anti_flip_hard_limit 会把抬高后的下限写进优化器，优化器从一开始就无法进入反弯区间。
+
+6. 在反弯被纠正时，写回 retargeting.last_qpos。确保下一次优化以“纠正后的姿态”为初值，而不是继续沿用错误解。
+
+## anti_flip 参数说明
+
+| 参数 | 默认值 | 说明 |
+| --- | --- | --- |
+| anti_flip_lower_offset_rad | 0.3 | 在 URDF 关节下限基础上上移的幅度（rad） |
+| anti_flip_blend | 0.7 | 反弯触发时回退到“最近健康姿态”的权重 |
+| anti_flip_strict | True | 回退后再硬夹紧到阈值以上 |
+| anti_flip_fingers | "1,3,4,5" | 需要限制的手指（joint3） |
+| anti_flip_extra_joint4_fingers | "1,5" | 额外限制 joint4 的手指 |
+| anti_flip_seed_straight | True | 初始健康姿态设为全 0（直手） |

@@ -149,6 +149,16 @@ def start_retargeting(
     filter_sigma: float,
     ema_alpha: float,
     max_vel_rad: float,
+    anti_flip_enable: bool,
+    anti_flip_min_rad: float,
+    anti_flip_blend: float,
+    anti_flip_strict: bool,
+    anti_flip_use_urdf_limits: bool,
+    anti_flip_lower_offset_rad: float,
+    anti_flip_hard_limit: bool,
+    anti_flip_extra_joint4_fingers: str,
+    anti_flip_fingers: str,
+    anti_flip_seed_straight: bool,
 ):
     rclpy.init()
     RetargetingConfig.set_default_urdf_dir(str(robot_dir))
@@ -178,6 +188,62 @@ def start_retargeting(
     dtype=int,
     )
 
+    finger_name_groups = {}
+    if anti_flip_fingers:
+        try:
+            finger_ids = {
+                int(x.strip())
+                for x in anti_flip_fingers.split(",")
+                if x.strip()
+            }
+        except ValueError:
+            finger_ids = set()
+        for finger_id in finger_ids:
+            target_name = f"finger{finger_id}_joint3"
+            indices = [
+                i
+                for i, name in enumerate(actuated_joint_names)
+                if name == target_name
+            ]
+            if indices:
+                finger_name_groups[finger_id] = indices
+
+    if anti_flip_extra_joint4_fingers:
+        try:
+            finger_ids = {
+                int(x.strip())
+                for x in anti_flip_extra_joint4_fingers.split(",")
+                if x.strip()
+            }
+        except ValueError:
+            finger_ids = set()
+        for finger_id in finger_ids:
+            target_name = f"finger{finger_id}_joint4"
+            indices = [
+                i
+                for i, name in enumerate(actuated_joint_names)
+                if name == target_name
+            ]
+            if indices:
+                finger_name_groups.setdefault(finger_id, []).extend(indices)
+
+    joint_lower_bounds = {}
+    if anti_flip_use_urdf_limits:
+        for i, name in enumerate(retargeting.optimizer.target_joint_names):
+            lower = retargeting.joint_limits[i, 0]
+            joint_lower_bounds[name] = lower + anti_flip_lower_offset_rad
+
+    if anti_flip_hard_limit and finger_name_groups:
+        new_limits = retargeting.joint_limits.copy()
+        for indices in finger_name_groups.values():
+            for idx in indices:
+                new_limits[idx, 0] = new_limits[idx, 0] + anti_flip_lower_offset_rad
+        retargeting.joint_limits = new_limits
+        retargeting.optimizer.set_joint_limit(new_limits)
+        retargeting.last_qpos = np.clip(
+            retargeting.last_qpos, new_limits[:, 0], new_limits[:, 1]
+        )
+
     history = deque(maxlen=max(1, filter_window))
     gaussian_weights = None
     if filter_type == "gaussian":
@@ -189,6 +255,10 @@ def start_retargeting(
 
     last_qpos = None
     last_time = None
+    if anti_flip_seed_straight:
+        last_good_qpos = np.zeros(len(actuated_joint_names), dtype=np.float32)
+    else:
+        last_good_qpos = None
 
 # -------------------------------------------------------------------
     prev_qpos = None
@@ -197,7 +267,6 @@ def start_retargeting(
     curr_time = None
     target_dt = 1.0 / max(1e-3, publish_rate_hz)
     last_pub = time.time()
-
     while True:
         # Consume latest joint data if available.
         try:
@@ -267,9 +336,37 @@ def start_retargeting(
                         last_qpos = qpos_publish.copy()
                         last_time = now
 
+                if anti_flip_enable and finger_name_groups:
+                    if last_good_qpos is None:
+                        last_good_qpos = qpos_publish.copy()
+                    abnormal_indices = []
+                    for finger_id, indices in finger_name_groups.items():
+                        finger_vals = qpos_publish[indices]
+                        for idx in indices:
+                            name = actuated_joint_names[idx]
+                            lower = joint_lower_bounds.get(name, anti_flip_min_rad)
+                            if qpos_publish[idx] < lower:
+                                abnormal_indices.append(idx)
+                    if abnormal_indices:
+                        qpos_corrected = qpos_publish.copy()
+                        qpos_corrected[abnormal_indices] = (
+                            (1.0 - anti_flip_blend) * qpos_corrected[abnormal_indices]
+                            + anti_flip_blend * last_good_qpos[abnormal_indices]
+                        )
+                        if anti_flip_strict:
+                            for idx in abnormal_indices:
+                                name = actuated_joint_names[idx]
+                                lower = joint_lower_bounds.get(name, anti_flip_min_rad)
+                                qpos_corrected[idx] = max(
+                                    qpos_corrected[idx], lower
+                                )
+                        qpos_publish = qpos_corrected
+                        retargeting.last_qpos = qpos_publish.astype(np.float32)
+                    else:
+                        last_good_qpos = qpos_publish.copy()
+
                 joint_publisher_node.joint_names = list(actuated_joint_names)
                 joint_publisher_node.publish_joints(qpos_publish)
-
         # 检查退出条件
         if cv2.waitKey(1) & 0xFF == ord("q"):
             break
@@ -306,6 +403,16 @@ def main(
     filter_sigma: float = 1.5,
     ema_alpha: float = 0.1,
     max_vel_rad: float = 1.0,
+    anti_flip_enable: bool = True,
+    anti_flip_min_rad: float = -0.2,
+    anti_flip_blend: float = 0.7,
+    anti_flip_strict: bool = True,
+    anti_flip_use_urdf_limits: bool = True,
+    anti_flip_lower_offset_rad: float = 0.3,
+    anti_flip_hard_limit: bool = True,
+    anti_flip_extra_joint4_fingers: str = "1,5",
+    anti_flip_fingers: str = "1,3,4,5",
+    anti_flip_seed_straight: bool = True,
 ):
     """
     Detects the human hand pose from a video and translates the human pose trajectory into a robot pose trajectory.
@@ -324,6 +431,16 @@ def main(
         filter_sigma: sigma for gaussian filter
         ema_alpha: smoothing factor for EMA, larger is less smooth
         max_vel_rad: max joint velocity (rad/s), <= 0 disables the limiter
+        anti_flip_enable: enable anti-hyperextension correction
+        anti_flip_min_rad: threshold for detecting reverse bend (rad)
+        anti_flip_blend: blend ratio to last good pose for bad joints
+        anti_flip_strict: clamp bad joints to anti_flip_min_rad after blending
+        anti_flip_use_urdf_limits: use URDF lower limits as threshold
+        anti_flip_lower_offset_rad: raise URDF lower limits by this offset
+        anti_flip_hard_limit: enforce raised lower limits in the optimizer
+        anti_flip_extra_joint4_fingers: comma-separated finger ids to also guard joint4
+        anti_flip_fingers: comma-separated finger ids to guard (1-5)
+        anti_flip_seed_straight: initialize last good pose to all-zero straight
     """
     config_path = get_default_config_path(robot_name, retargeting_type, hand_type)
     robot_dir = (
@@ -346,6 +463,16 @@ def main(
             filter_sigma,
             ema_alpha,
             max_vel_rad,
+            anti_flip_enable,
+            anti_flip_min_rad,
+            anti_flip_blend,
+            anti_flip_strict,
+            anti_flip_use_urdf_limits,
+            anti_flip_lower_offset_rad,
+            anti_flip_hard_limit,
+            anti_flip_extra_joint4_fingers,
+            anti_flip_fingers,
+            anti_flip_seed_straight,
         ),
     )
 
@@ -364,3 +491,17 @@ def main(
 
 if __name__ == "__main__":
     tyro.cli(main)
+
+"""
+python retargeting_ros2.py \
+  --robot_name wuji \
+  --retargeting_type dexpilot \
+  --hand-type right \
+  --ros-topic /hotrack/landmarks \
+  --publish-topic /hand_0/joint_commands \
+  --publish-rate-hz 80 \
+  --max-vel-rad 3.0 \
+  --filter-type ema \
+  --ema-alpha 0.35
+
+"""

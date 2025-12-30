@@ -1,4 +1,5 @@
 from abc import abstractmethod
+import time
 from typing import List, Optional
 
 import nlopt
@@ -221,6 +222,7 @@ class VectorOptimizer(Optimizer):
         self.huber_loss = torch.nn.SmoothL1Loss(beta=huber_delta, reduction="mean")
         self.norm_delta = norm_delta
         self.scaling = scaling
+        self._scaling_vec = None
 
         # Computation cache for better performance
         # For one link used in multiple vectors, e.g. hand palm, we do not want to compute it multiple times
@@ -394,8 +396,14 @@ class DexPilotOptimizer(Optimizer):
 
         # Sanity check and cache link indices
         self.computed_link_indices = self.get_link_indices(self.computed_link_names)
-
         self.opt.set_ftol_abs(1e-6)
+
+        if isinstance(scaling, (list, tuple, np.ndarray)):
+            scaling_arr = np.asarray(scaling, dtype=np.float32)
+            if scaling_arr.shape == (self.num_fingers,):
+                self._scaling_vec = self._build_scaling_vector(
+                    scaling_arr, origin_link_index, task_link_index
+                )
 
         # DexPilot cache
         (
@@ -405,6 +413,22 @@ class DexPilotOptimizer(Optimizer):
             self.projected_dist,
         ) = self.set_dexpilot_cache(self.num_fingers, eta1, eta2)
 
+    def _build_scaling_vector(
+        self,
+        scaling_arr: np.ndarray,
+        origin_link_index: List[int],
+        task_link_index: List[int],
+    ) -> np.ndarray:
+        scaling_vec = []
+        for origin, task in zip(origin_link_index, task_link_index):
+            if origin == 0 or task == 0:
+                finger_id = max(origin, task) - 1
+                scaling_vec.append(float(scaling_arr[finger_id]))
+            else:
+                scaling_vec.append(
+                    float(0.5 * (scaling_arr[origin - 1] + scaling_arr[task - 1]))
+                )
+        return np.asarray(scaling_vec, dtype=np.float32)
     @staticmethod
     def generate_link_indices(num_fingers):
         """
@@ -464,22 +488,33 @@ class DexPilotOptimizer(Optimizer):
         len_s2 = len(self.s2_project_index_task)
         len_s1 = len_proj - len_s2
 
-        # Update projection indicator
+        # Update projection weights with smooth transition
         target_vec_dist = np.linalg.norm(target_vector[:len_proj], axis=1)
-        self.projected[:len_s1][target_vec_dist[0:len_s1] < self.project_dist] = True
-        self.projected[:len_s1][target_vec_dist[0:len_s1] > self.escape_dist] = False
-        self.projected[len_s1:len_proj] = np.logical_and(
-            self.projected[:len_s1][self.s2_project_index_origin],
-            self.projected[:len_s1][self.s2_project_index_task],
-        )
-        self.projected[len_s1:len_proj] = np.logical_and(
-            self.projected[len_s1:len_proj], target_vec_dist[len_s1:len_proj] <= 0.03
-        )
+        project_alpha = np.zeros(len_proj, dtype=np.float32)
+        eps = 1e-6
+        for i in range(len_s1):
+            if target_vec_dist[i] <= self.project_dist:
+                project_alpha[i] = 1.0
+            elif target_vec_dist[i] >= self.escape_dist:
+                project_alpha[i] = 0.0
+            else:
+                project_alpha[i] = (
+                    (self.escape_dist - target_vec_dist[i])
+                    / (self.escape_dist - self.project_dist + eps)
+                )
+
+        for i in range(len_s2):
+            origin_id = self.s2_project_index_origin[i]
+            task_id = self.s2_project_index_task[i]
+            alpha = min(project_alpha[origin_id], project_alpha[task_id])
+            if target_vec_dist[len_s1 + i] > 0.03:
+                alpha = 0.0
+            project_alpha[len_s1 + i] = alpha
 
         # Update weight vector
         normal_weight = np.ones(len_proj, dtype=np.float32) * 1
         high_weight = np.array([200] * len_s1 + [400] * len_s2, dtype=np.float32)
-        weight = np.where(self.projected, high_weight, normal_weight)
+        weight = normal_weight + project_alpha * (high_weight - normal_weight)
 
         # We change the weight to 10 instead of 1 here, for vector originate from wrist to fingertips
         # This ensures better intuitive mapping due wrong pose detection
@@ -494,13 +529,17 @@ class DexPilotOptimizer(Optimizer):
         )
 
         # Compute reference distance vector
-        normal_vec = target_vector * self.scaling  # (10, 3)
+        if self._scaling_vec is None:
+            normal_vec = target_vector * self.scaling
+        else:
+            normal_vec = target_vector * self._scaling_vec[:, None]
         dir_vec = target_vector[:len_proj] / (target_vec_dist[:, None] + 1e-6)  # (6, 3)
         projected_vec = dir_vec * self.projected_dist[:, None]  # (6, 3)
 
         # Compute final reference vector
-        reference_vec = np.where(
-            self.projected[:, None], projected_vec, normal_vec[:len_proj]
+        reference_vec = (
+            project_alpha[:, None] * projected_vec
+            + (1.0 - project_alpha[:, None]) * normal_vec[:len_proj]
         )  # (6, 3)
         reference_vec = np.concatenate(
             [reference_vec, normal_vec[len_proj:]], axis=0
@@ -515,6 +554,7 @@ class DexPilotOptimizer(Optimizer):
             if self.adaptor is not None:
                 qpos[:] = self.adaptor.forward_qpos(qpos)[:]
 
+            t_fk_start = None
             self.robot.compute_forward_kinematics(qpos)
             target_link_poses = [
                 self.robot.get_link_pose(index) for index in self.computed_link_indices
@@ -540,7 +580,6 @@ class DexPilotOptimizer(Optimizer):
             ).sum()
             huber_distance = huber_distance.sum()
             result = huber_distance.cpu().detach().item()
-
             if grad.size > 0:
                 jacobians = []
                 for i, index in enumerate(self.computed_link_indices):
@@ -572,7 +611,6 @@ class DexPilotOptimizer(Optimizer):
                 grad_qpos += 2 * self.norm_delta * (x - last_qpos)
 
                 grad[:] = grad_qpos[:]
-
             return result
 
         return objective

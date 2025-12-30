@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Optional, Dict, Any, Tuple
+from typing import List, Optional, Dict, Any, Tuple, Union
 from typing import Union
 
 import numpy as np
@@ -41,9 +41,9 @@ class RetargetingConfig:
     # DexPilot retargeting link names
     finger_tip_link_names: Optional[List[str]] = None
 
-    # Scaling factor for vector retargeting only
+    # Scaling factor for vector retargeting only. Accepts a scalar or per-finger list (thumb->pinky).
     # For example, Allegro is 1.6 times larger than normal human hand, then this scaling factor should be 1.6
-    scaling_factor: float = 1.0
+    scaling_factor: Union[float, List[float]] = 1.0
 
     # Optimization parameters
     normal_delta: float = 4e-3

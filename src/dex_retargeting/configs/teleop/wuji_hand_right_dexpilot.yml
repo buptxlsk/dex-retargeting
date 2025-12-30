@@ -5,7 +5,8 @@ retargeting:
   # Target (robot hand)
   wrist_link_name: "palm_link"
   finger_tip_link_names: ["finger1_tip_link", "finger2_tip_link", "finger3_tip_link", "finger4_tip_link", "finger5_tip_link"]
-  scaling_factor: 1.2
+  scaling_factor: [1.025,1.2,1.2,1.2,1.125]  # 每根手指的缩放系数 thumb -> pinky
+
 
   # 建议明确优化的目标关节（按该 URDF 实际可动关节挑主 DOF；与常见 OmniHand 风格一致）
   target_joint_names:
@@ -31,4 +32,4 @@ retargeting:
     - finger5_joint4  
 
   # Temporal smoothing（越小越平滑）
-  low_pass_alpha: 0.3
+  low_pass_alpha: 0.2
