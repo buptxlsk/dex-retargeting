@@ -41,6 +41,30 @@ def _gaussian_weights(window_size: int, sigma: float) -> np.ndarray:
     weights = np.exp(-(x ** 2) / (2 * sigma ** 2))
     return weights / np.sum(weights)
 
+FINGER_DIP_INDICES = np.array([3, 7, 11, 15, 19], dtype=int)
+FINGER_TIP_INDICES = np.array([4, 8, 12, 16, 20], dtype=int)
+
+
+def _fingertip_direction_vectors(
+    joint_pos: np.ndarray, num_fingers: int
+) -> np.ndarray:
+    dip_idx = FINGER_DIP_INDICES[:num_fingers]
+    tip_idx = FINGER_TIP_INDICES[:num_fingers]
+    vec = joint_pos[tip_idx, :] - joint_pos[dip_idx, :]
+    norm = np.linalg.norm(vec, axis=1, keepdims=True) + 1e-6
+    return vec / norm
+
+
+def _append_fingertip_direction(
+    ref_value: np.ndarray, joint_pos: np.ndarray, optimizer
+) -> np.ndarray:
+    if getattr(optimizer, "fingertip_direction_weight", 0.0) <= 0.0:
+        return ref_value
+    if getattr(optimizer, "finger_dip_link_names", None) is None:
+        return ref_value
+    dir_vec = _fingertip_direction_vectors(joint_pos, optimizer.num_fingers)
+    return np.concatenate([ref_value, dir_vec], axis=0)
+
 
 class ROS2LandmarkSubscriber(Node):
     """ROS2 节点，订阅手部关键点 PoseArray 消息，把 21x3 点塞进 queue。"""
@@ -286,6 +310,10 @@ def start_retargeting_mujoco(
                         ref_value = (
                             joint_pos[task_indices, :] - joint_pos[origin_indices, :]
                         )
+                        if retargeting_type == "DEXPILOT":
+                            ref_value = _append_fingertip_direction(
+                                ref_value, joint_pos, retargeting.optimizer
+                            )
 
                     qpos = retargeting.retarget(ref_value).astype(np.float64)
                     if filter_type == "ema":

@@ -49,7 +49,7 @@ python retargeting_ros2.py \
   --hand-type right \
   --ros-topic /hotrack/landmarks \
   --publish-topic /hand_0/joint_commands \
-  --publish-rate-hz 80 \
+  --publish-rate-hz 90 \
   --max-vel-rad 1.0 \
   --filter-type ema \
   --ema-alpha 0.1
@@ -133,6 +133,8 @@ python retargeting_mujoco_ros2.py \
 5. 使用 URDF 的 joint lower 作为基准阈值，并通过 anti_flip_lower_offset_rad 往上抬。anti_flip_hard_limit 会把抬高后的下限写进优化器，优化器从一开始就无法进入反弯区间。
 
 6. 在反弯被纠正时，写回 retargeting.last_qpos。确保下一次优化以“纠正后的姿态”为初值，而不是继续沿用错误解。
+
+7. 新增“指尖方向 loss”：用 DIP→fingertip 的方向向量约束指尖姿态，改善捏合时的接触面积；通过 finger_dip_link_names + fingertip_direction_weight 开启。
 
 ## anti_flip 参数说明
 

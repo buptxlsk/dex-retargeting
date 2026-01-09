@@ -349,6 +349,8 @@ class DexPilotOptimizer(Optimizer):
         eta1=1e-4,
         eta2=3e-2,
         scaling=1.0,
+        finger_dip_link_names: Optional[List[str]] = None,
+        fingertip_direction_weight: float = 0.0,
     ):
         if len(finger_tip_link_names) < 2 or len(finger_tip_link_names) > 5:
             raise ValueError(
@@ -375,6 +377,8 @@ class DexPilotOptimizer(Optimizer):
         self.scaling = scaling
         self.huber_loss = torch.nn.SmoothL1Loss(beta=huber_delta, reduction="none")
         self.norm_delta = norm_delta
+        self.finger_dip_link_names = finger_dip_link_names
+        self.fingertip_direction_weight = float(fingertip_direction_weight)
 
         # DexPilot parameters
         self.project_dist = project_dist
@@ -385,7 +389,9 @@ class DexPilotOptimizer(Optimizer):
         # Computation cache for better performance
         # For one link used in multiple vectors, e.g. hand palm, we do not want to compute it multiple times
         self.computed_link_names = list(
-            set(target_origin_link_names).union(set(target_task_link_names))
+            set(target_origin_link_names)
+            .union(set(target_task_link_names))
+            .union(set(finger_dip_link_names or []))
         )
         self.origin_link_indices = torch.tensor(
             [self.computed_link_names.index(name) for name in target_origin_link_names]
@@ -393,6 +399,15 @@ class DexPilotOptimizer(Optimizer):
         self.task_link_indices = torch.tensor(
             [self.computed_link_names.index(name) for name in target_task_link_names]
         )
+        self.tip_link_indices = None
+        self.dip_link_indices = None
+        if finger_dip_link_names:
+            self.tip_link_indices = torch.tensor(
+                [self.computed_link_names.index(name) for name in finger_tip_link_names]
+            )
+            self.dip_link_indices = torch.tensor(
+                [self.computed_link_names.index(name) for name in finger_dip_link_names]
+            )
 
         # Sanity check and cache link indices
         self.computed_link_indices = self.get_link_indices(self.computed_link_names)
@@ -487,9 +502,23 @@ class DexPilotOptimizer(Optimizer):
         len_proj = len(self.projected)
         len_s2 = len(self.s2_project_index_task)
         len_s1 = len_proj - len_s2
+        base_count = len_proj + self.num_fingers
+        if target_vector.shape[0] < base_count:
+            raise ValueError(
+                f"DexPilot target_vector expects at least {base_count} vectors, "
+                f"but got {target_vector.shape[0]}"
+            )
+        target_vector_base = target_vector[:base_count]
+        target_dir = None
+        if (
+            self.fingertip_direction_weight > 0.0
+            and self.finger_dip_link_names is not None
+            and target_vector.shape[0] >= base_count + self.num_fingers
+        ):
+            target_dir = target_vector[base_count : base_count + self.num_fingers]
 
         # Update projection weights with smooth transition
-        target_vec_dist = np.linalg.norm(target_vector[:len_proj], axis=1)
+        target_vec_dist = np.linalg.norm(target_vector_base[:len_proj], axis=1)
         project_alpha = np.zeros(len_proj, dtype=np.float32)
         eps = 1e-6
         for i in range(len_s1):
@@ -530,10 +559,10 @@ class DexPilotOptimizer(Optimizer):
 
         # Compute reference distance vector
         if self._scaling_vec is None:
-            normal_vec = target_vector * self.scaling
+            normal_vec = target_vector_base * self.scaling
         else:
-            normal_vec = target_vector * self._scaling_vec[:, None]
-        dir_vec = target_vector[:len_proj] / (target_vec_dist[:, None] + 1e-6)  # (6, 3)
+            normal_vec = target_vector_base * self._scaling_vec[:, None]
+        dir_vec = target_vector_base[:len_proj] / (target_vec_dist[:, None] + 1e-6)  # (6, 3)
         projected_vec = dir_vec * self.projected_dist[:, None]  # (6, 3)
 
         # Compute final reference vector
@@ -546,6 +575,12 @@ class DexPilotOptimizer(Optimizer):
         )  # (10, 3)
         torch_target_vec = torch.as_tensor(reference_vec, dtype=torch.float32)
         torch_target_vec.requires_grad_(False)
+        torch_target_dir = None
+        if target_dir is not None:
+            torch_target_dir = torch.as_tensor(target_dir, dtype=torch.float32)
+            torch_target_dir = torch_target_dir / (
+                torch.norm(torch_target_dir, dim=1, keepdim=True) + 1e-6
+            )
 
         def objective(x: np.ndarray, grad: np.ndarray) -> float:
             qpos[self.idx_pin2target] = x
@@ -579,7 +614,23 @@ class DexPilotOptimizer(Optimizer):
                 / (robot_vec.shape[0])
             ).sum()
             huber_distance = huber_distance.sum()
-            result = huber_distance.cpu().detach().item()
+
+            dir_loss = None
+            if torch_target_dir is not None:
+                dip_pos = torch_body_pos[self.dip_link_indices, :]
+                tip_pos = torch_body_pos[self.tip_link_indices, :]
+                robot_dir = tip_pos - dip_pos
+                robot_dir = robot_dir / (
+                    torch.norm(robot_dir, dim=1, keepdim=True) + 1e-6
+                )
+                dir_err = torch.norm(robot_dir - torch_target_dir, dim=1)
+                dir_loss = (
+                    self.huber_loss(dir_err, torch.zeros_like(dir_err)).mean()
+                    * self.fingertip_direction_weight
+                )
+
+            total_loss = huber_distance if dir_loss is None else huber_distance + dir_loss
+            result = total_loss.cpu().detach().item()
             if grad.size > 0:
                 jacobians = []
                 for i, index in enumerate(self.computed_link_indices):
@@ -593,7 +644,7 @@ class DexPilotOptimizer(Optimizer):
 
                 # Note: the joint order in this jacobian is consistent pinocchio
                 jacobians = np.stack(jacobians, axis=0)
-                huber_distance.backward()
+                total_loss.backward()
                 grad_pos = torch_body_pos.grad.cpu().numpy()[:, None, :]
 
                 # Convert the jacobian from pinocchio order to target order

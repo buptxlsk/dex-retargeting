@@ -14,6 +14,29 @@ from dex_retargeting.constants import (
 from dex_retargeting.retargeting_config import RetargetingConfig
 from dex_retargeting.seq_retarget import SeqRetargeting
 
+FINGER_DIP_INDICES = np.array([3, 7, 11, 15, 19], dtype=int)
+FINGER_TIP_INDICES = np.array([4, 8, 12, 16, 20], dtype=int)
+
+
+def _fingertip_direction_vectors(
+    joint_pos: np.ndarray, num_fingers: int
+) -> np.ndarray:
+    dip_idx = FINGER_DIP_INDICES[:num_fingers]
+    tip_idx = FINGER_TIP_INDICES[:num_fingers]
+    vec = joint_pos[tip_idx, :] - joint_pos[dip_idx, :]
+    norm = np.linalg.norm(vec, axis=1, keepdims=True) + 1e-6
+    return vec / norm
+
+
+def _append_fingertip_direction(
+    ref_value: np.ndarray, joint_pos: np.ndarray, optimizer
+) -> np.ndarray:
+    if getattr(optimizer, "fingertip_direction_weight", 0.0) <= 0.0:
+        return ref_value
+    if getattr(optimizer, "finger_dip_link_names", None) is None:
+        return ref_value
+    dir_vec = _fingertip_direction_vectors(joint_pos, optimizer.num_fingers)
+    return np.concatenate([ref_value, dir_vec], axis=0)
 
 def profile_retargeting(retargeting: SeqRetargeting, data: List[np.ndarray]):
     retargeting_type = retargeting.optimizer.retargeting_type
@@ -28,6 +51,10 @@ def profile_retargeting(retargeting: SeqRetargeting, data: List[np.ndarray]):
             origin_indices = indices[0, :]
             task_indices = indices[1, :]
             ref_value = joint_pos[task_indices, :] - joint_pos[origin_indices, :]
+            if retargeting_type == "DEXPILOT":
+                ref_value = _append_fingertip_direction(
+                    ref_value, joint_pos, retargeting.optimizer
+                )
         tic = time.perf_counter()
         _ = retargeting.retarget(ref_value)
         tac = time.perf_counter()

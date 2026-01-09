@@ -40,6 +40,8 @@ class RetargetingConfig:
 
     # DexPilot retargeting link names
     finger_tip_link_names: Optional[List[str]] = None
+    # Optional DIP link names for fingertip direction loss (DIP -> fingertip).
+    finger_dip_link_names: Optional[List[str]] = None
 
     # Scaling factor for vector retargeting only. Accepts a scalar or per-finger list (thumb->pinky).
     # For example, Allegro is 1.6 times larger than normal human hand, then this scaling factor should be 1.6
@@ -52,6 +54,8 @@ class RetargetingConfig:
     # DexPilot optimizer parameters
     project_dist: float = 0.03
     escape_dist: float = 0.05
+    # Weight for fingertip direction loss (0 disables).
+    fingertip_direction_weight: float = 0.0
 
     # Joint limit tag
     has_joint_limits: bool = True
@@ -115,6 +119,12 @@ class RetargetingConfig:
                 raise ValueError(
                     "Position retargeting requires: finger_tip_link_names + wrist_link_name"
                 )
+            if self.finger_dip_link_names is not None:
+                if len(self.finger_dip_link_names) != len(self.finger_tip_link_names):
+                    raise ValueError(
+                        "DexPilot fingertip direction requires finger_dip_link_names length "
+                        "to match finger_tip_link_names"
+                    )
             if self.target_link_human_indices is not None:
                 print(
                     "\033[33m",
@@ -165,7 +175,7 @@ class RetargetingConfig:
         return config
 
     def build(self) -> SeqRetargeting:
-        from dex_retargeting.optimizer_omni import (
+        from dex_retargeting.optimizer import (
             VectorOptimizer,
             PositionOptimizer,
             DexPilotOptimizer,
@@ -225,6 +235,8 @@ class RetargetingConfig:
                 scaling=self.scaling_factor,
                 project_dist=self.project_dist,
                 escape_dist=self.escape_dist,
+                finger_dip_link_names=self.finger_dip_link_names,
+                fingertip_direction_weight=self.fingertip_direction_weight,
             )
         else:
             raise RuntimeError()
