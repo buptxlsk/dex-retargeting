@@ -1,5 +1,5 @@
 # 简介
-该模块使用dex-retargeting算法，能够根据PoseArray数据实现实时遥操omnihand
+该模块使用dex-retargeting算法，能够根据PoseArray数据实现实时遥操omnihand,wujihand
 
 # 迁移过程
 1. 在运行该项目之前，先将[原项目](https://github.com/dexsuite/dex-retargeting)中的\example跑通，包括使用POSITION以及VECTOR/DEXPILOT这两种方法
