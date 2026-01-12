@@ -94,17 +94,7 @@ graph TD
     C --> D[/joint_commands：按 SAPIEN 关节顺序发布关节角 JointState]
 ```
 
-**4. 将输出转换为SAPIEN 3D 窗口中手部模型的运动**
-```bash
-  python retargeting_sapien_ros2.py \
-  --robot_name omni \
-  --retargeting_type dexpilot \
-  --hand_type right \
-  --ros_topic /vrpn/hand_kp
-```
-此处ros_topic的名字取决于发布设备
-
-**5. 将输出转换为MUJOCO 3D 窗口中手部模型的运动**
+**4. 将输出转换为MUJOCO 3D 窗口中手部模型的运动**
 
 由于智元官方没有给出omnihand的.xml文件，使用开源的方法[urdf2mjcf](https://github.com/kscalelabs/urdf2mjcf)将.urdf转换为.xml并放入运行目录下
 ```bash
