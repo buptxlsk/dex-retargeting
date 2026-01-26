@@ -6,8 +6,8 @@ retargeting:
   wrist_link_name: "palm_link"
   finger_tip_link_names: ["finger1_tip_link", "finger2_tip_link", "finger3_tip_link", "finger4_tip_link", "finger5_tip_link"]
   finger_dip_link_names: ["finger1_link3", "finger2_link3", "finger3_link3", "finger4_link3", "finger5_link3"]
-  scaling_factor: [1.025,1.2,1.2,1.2,1.125]  # 每根手指的缩放系数 thumb -> pinky
-  fingertip_direction_weight: 0.2  # 指尖方向 loss 的权重（DIP -> tip）
+  scaling_factor: [1.23,1.2,1.2,1.2,1.28]  # 每根手指的缩放系数 thumb -> pinky
+  fingertip_direction_weight: 0.1  # 指尖方向 loss 的权重（DIP -> tip）
 
 
   # 建议明确优化的目标关节（按该 URDF 实际可动关节挑主 DOF；与常见 OmniHand 风格一致）
