@@ -34,6 +34,13 @@ OPERATOR2MANO_RIGHT = np.array(
         [0, 1, 0],
     ]
 )
+OPERATOR2MANO_LEFT = np.array(
+    [
+        [0, 0, -1],
+        [1, 0, 0],
+        [0, -1, 0],
+    ]
+)
 
 # 创建ROS2节点和发布者
 class JointStatePublisher(Node):
@@ -60,11 +67,16 @@ class JointStatePublisher(Node):
 
 class ROS2LandmarkSubscriber(Node):
     """ROS2节点，订阅手部关键点PoseArray消息"""
-    def __init__(self, queue: multiprocessing.Queue, topic_name: str):
+    def __init__(
+        self,
+        queue: multiprocessing.Queue,
+        topic_name: str,
+        hand_type: HandType,
+    ):
         super().__init__('hand_retargeting_node')
         self.queue = queue
         self.operator2mano = (
-            OPERATOR2MANO_RIGHT
+            OPERATOR2MANO_LEFT if hand_type == HandType.left else OPERATOR2MANO_RIGHT
         )
         self.subscription = self.create_subscription(
             PoseArray,
@@ -403,12 +415,16 @@ def start_retargeting(
     joint_publisher_node.destroy_node()
     rclpy.shutdown()
 
-def produce_frame(queue: multiprocessing.Queue, ros_topic: Optional[str] = None):
+def produce_frame(
+    queue: multiprocessing.Queue,
+    ros_topic: Optional[str] = None,
+    hand_type: HandType = HandType.right,
+):
     if ros_topic is None:
         ros_topic = "/vrpn/hand_kp"  # 默认话题
     
     rclpy.init()
-    pos_subscriber = ROS2LandmarkSubscriber(queue, ros_topic)
+    pos_subscriber = ROS2LandmarkSubscriber(queue, ros_topic, hand_type)
     
     try:
         rclpy.spin(pos_subscriber)
@@ -439,7 +455,7 @@ def main(
     anti_flip_lower_offset_rad: float = 0.3,
     anti_flip_hard_limit: bool = True,
     anti_flip_extra_joint4_fingers: str = "1,5",
-    anti_flip_fingers: str = "1,3,4,5",
+    anti_flip_fingers: str = "1,2,3,4,5",
     anti_flip_seed_straight: bool = True,
 ):
     """
@@ -476,7 +492,7 @@ def main(
     )
     queue = multiprocessing.Queue(maxsize=10)
     producer_process = multiprocessing.Process(
-        target=produce_frame, args=(queue, ros_topic)
+        target=produce_frame, args=(queue, ros_topic, hand_type)
     )
     consumer_process = multiprocessing.Process(
         target=start_retargeting,
@@ -531,5 +547,4 @@ python retargeting_ros2.py \
   --max-vel-rad 3.0 \
   --filter-type ema \
   --ema-alpha 0.35
-
 """

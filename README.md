@@ -133,6 +133,6 @@ python retargeting_mujoco_ros2.py \
 | anti_flip_lower_offset_rad | 0.3 | 在 URDF 关节下限基础上上移的幅度（rad） |
 | anti_flip_blend | 0.7 | 反弯触发时回退到“最近健康姿态”的权重 |
 | anti_flip_strict | True | 回退后再硬夹紧到阈值以上 |
-| anti_flip_fingers | "1,3,4,5" | 需要限制的手指（joint3） |
+| anti_flip_fingers | "1,2,3,4,5" | 需要限制的手指（joint3） |
 | anti_flip_extra_joint4_fingers | "1,5" | 额外限制 joint4 的手指 |
 | anti_flip_seed_straight | True | 初始健康姿态设为全 0（直手） |

@@ -34,6 +34,13 @@ OPERATOR2MANO_RIGHT = np.array(
         [0, 1, 0],
     ]
 )
+OPERATOR2MANO_LEFT = np.array(
+    [
+        [0, 0, -1],
+        [1, 0, 0],
+        [0, -1, 0],
+    ]
+)
 
 # 创建ROS2节点和发布者
 class JointStatePublisher(Node):
@@ -71,11 +78,14 @@ class ROS2ManusNodeSubscriber(Node):
         self,
         queue: multiprocessing.Queue,
         topic_name: str,
+        hand_type: HandType,
         position_scale: float = 1.0,
     ):
         super().__init__("hand_retargeting_node")
         self.queue = queue
-        self.operator2mano = OPERATOR2MANO_RIGHT
+        self.operator2mano = (
+            OPERATOR2MANO_LEFT if hand_type == HandType.left else OPERATOR2MANO_RIGHT
+        )
         self.position_scale = position_scale
         self.subscription = self.create_subscription(
             ManusNodePoses,
@@ -431,6 +441,7 @@ def start_retargeting(
 def produce_frame(
     queue: multiprocessing.Queue,
     ros_topic: Optional[str] = None,
+    hand_type: HandType = HandType.right,
     position_scale: float = 1.0,
 ):
     if ros_topic is None:
@@ -438,7 +449,7 @@ def produce_frame(
     
     rclpy.init()
     pos_subscriber = ROS2ManusNodeSubscriber(
-        queue, ros_topic, position_scale=position_scale
+        queue, ros_topic, hand_type, position_scale=position_scale
     )
     
     try:
@@ -470,7 +481,7 @@ def main(
     anti_flip_lower_offset_rad: float = 0.3,
     anti_flip_hard_limit: bool = True,
     anti_flip_extra_joint4_fingers: str = "1,5",
-    anti_flip_fingers: str = "1,3,4,5",
+    anti_flip_fingers: str = "1,2,3,4,5",
     anti_flip_seed_straight: bool = True,
     position_scale: float = 1.0,
 ):
@@ -509,7 +520,7 @@ def main(
     )
     queue = multiprocessing.Queue(maxsize=10)
     producer_process = multiprocessing.Process(
-        target=produce_frame, args=(queue, ros_topic, position_scale)
+        target=produce_frame, args=(queue, ros_topic, hand_type, position_scale)
     )
     consumer_process = multiprocessing.Process(
         target=start_retargeting,
@@ -558,11 +569,19 @@ python manus_retargeting_ros2.py \
   --robot_name wuji \
   --retargeting_type dexpilot \
   --hand-type right \
-  --ros-topic /manus_node_poses_0 \
-  --publish-topic /hand_0/joint_commands \
+  --ros-topic /manus_node_poses_right \
+  --publish-topic /right_hand/joint_commands \
   --publish-rate-hz 80 \
-  --max-vel-rad 3.0 \
-  --filter-type ema \
-  --ema-alpha 0.35
+  --max-vel-rad 5.0 \
+  --filter-type none
 
+python manus_retargeting_ros2.py \
+  --robot_name wuji \
+  --retargeting_type dexpilot \
+  --hand-type left \
+  --ros-topic /manus_node_poses_left \
+  --publish-topic /left_hand/joint_commands \
+  --publish-rate-hz 80 \
+  --max-vel-rad 5.0 \
+  --filter-type none
 """

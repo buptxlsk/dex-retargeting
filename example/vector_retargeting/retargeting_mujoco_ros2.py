@@ -32,6 +32,13 @@ OPERATOR2MANO_RIGHT = np.array(
         [0, 1, 0],
     ]
 )
+OPERATOR2MANO_LEFT = np.array(
+    [
+        [0, 0, -1],
+        [1, 0, 0],
+        [0, -1, 0],
+    ]
+)
 
 def _gaussian_weights(window_size: int, sigma: float) -> np.ndarray:
     if window_size <= 1:
@@ -69,10 +76,17 @@ def _append_fingertip_direction(
 class ROS2LandmarkSubscriber(Node):
     """ROS2 节点，订阅手部关键点 PoseArray 消息，把 21x3 点塞进 queue。"""
 
-    def __init__(self, queue: multiprocessing.Queue, topic_name: str):
+    def __init__(
+        self,
+        queue: multiprocessing.Queue,
+        topic_name: str,
+        hand_type: HandType,
+    ):
         super().__init__("hand_retargeting_node")
         self.queue = queue
-        self.operator2mano = OPERATOR2MANO_RIGHT
+        self.operator2mano = (
+            OPERATOR2MANO_LEFT if hand_type == HandType.left else OPERATOR2MANO_RIGHT
+        )
         self.subscription = self.create_subscription(
             PoseArray,
             topic_name,
@@ -388,13 +402,17 @@ def start_retargeting_mujoco(
         logger.info("ROS2 shutdown.")
 
 
-def produce_frame(queue: multiprocessing.Queue, ros_topic: Optional[str] = None):
+def produce_frame(
+    queue: multiprocessing.Queue,
+    ros_topic: Optional[str] = None,
+    hand_type: HandType = HandType.right,
+):
     """ROS2 订阅进程：只负责往 queue 塞 21x3 关键点。"""
     if ros_topic is None:
         ros_topic = "/vrpn/hand_kp"
 
     rclpy.init()
-    node = ROS2LandmarkSubscriber(queue, ros_topic)
+    node = ROS2LandmarkSubscriber(queue, ros_topic, hand_type)
     try:
         rclpy.spin(node)
     except KeyboardInterrupt:
@@ -423,7 +441,7 @@ def main(
     anti_flip_lower_offset_rad: float = 0.3,
     anti_flip_hard_limit: bool = True,
     anti_flip_extra_joint4_fingers: str = "1,5",
-    anti_flip_fingers: str = "1,3,4,5",
+    anti_flip_fingers: str = "1,2,3,4,5",
     anti_flip_seed_straight: bool = True,
 ):
     """
@@ -443,7 +461,7 @@ def main(
 
     producer_process = multiprocessing.Process(
         target=produce_frame,
-        args=(queue, ros_topic),
+        args=(queue, ros_topic, hand_type),
     )
     consumer_process = multiprocessing.Process(
         target=start_retargeting_mujoco,
